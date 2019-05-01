@@ -1,0 +1,6 @@
+^gen/
+^bin/
+
+^.project$
+^.externalToolBuilders/
+glob:.DS_Store
