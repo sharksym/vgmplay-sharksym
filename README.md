@@ -72,7 +72,7 @@ Supported sound chips
   * K052539 Konami SCC+
     * Konami Sound Cartridge
   * SN76489 DCSG x2
-    * Musical Memory Mapper, Playsoniq, Franky, PSG
+    * Musical Memory Mapper, Playsoniq, Franky, MMC/SD Drive V4, PSG
   * YM2203 OPN x2
     * OPNA, Neotron, Yamaha SFG + PSG
   * YM2608 OPNA
