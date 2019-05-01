@@ -18,6 +18,9 @@
 	INCLUDE "Franky.asm"
 	INCLUDE "PlaySoniq.asm"
 	INCLUDE "MMM.asm"
+	INCLUDE "MmcsdDrive.asm"
+	INCLUDE "MmcsdPDCSG.asm"
+	INCLUDE "MmcsdSDCSG.asm"
 	INCLUDE "TurboRPCM.asm"
 	INCLUDE "OPN.asm"
 	INCLUDE "OPNA.asm"
@@ -69,6 +72,10 @@ Drivers: MACRO
 		StaticFactory PlaySoniq_instance, PlaySoniq_Construct, PlaySoniq_Destruct
 	mmm:
 		StaticFactory MMM_instance, MMM_Construct, MMM_Destruct
+	dcsgOnMmcsdP:
+		StaticFactory MMCSDpDCSG_instance, MMCSDpDCSG_Construct, MMCSDpDCSG_Destruct
+	dcsgOnMmcsdS:
+		StaticFactory MMCSDsDCSG_instance, MMCSDsDCSG_Construct, MMCSDsDCSG_Destruct
 	turboRPCM:
 		StaticFactory TurboRPCM_instance, TurboRPCM_Construct, TurboRPCM_Destruct
 	opn:
@@ -275,6 +282,20 @@ Drivers_TryCreatePlaySoniq_IY:
 ; f <- c: succeeded
 Drivers_TryCreateMMM_IY:
 	ld bc,Drivers.mmm
+	jr Drivers_TryCreate_IY_Trampoline
+
+; iy = this
+; de <- driver
+; f <- c: succeeded
+Drivers_TryCreateDCSGOnMmcsdP_IY:
+	ld bc,Drivers.dcsgOnMmcsdP
+	jr Drivers_TryCreate_IY_Trampoline
+
+; iy = this
+; de <- driver
+; f <- c: succeeded
+Drivers_TryCreateDCSGOnMmcsdS_IY:
+	ld bc,Drivers.dcsgOnMmcsdS
 	jr Drivers_TryCreate_IY_Trampoline
 
 ; iy = this
