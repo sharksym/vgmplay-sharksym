@@ -64,8 +64,8 @@ YM2608_Connect:
 ; hl <- device interface
 ; f <- c: succeeded
 YM2608_TryCreate:
-	call Drivers_TryCreateOPNA_IY
-	ld hl,OPNA_interface
+	call Drivers_TryCreateMakoto_IY
+	ld hl,Makoto_interface
 	ret c
 	call Drivers_TryCreateOPNAOnSFGPSGMSXAudio_IY
 	ld hl,OPNAOnSFGPSGMSXAudio_interface

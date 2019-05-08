@@ -8,6 +8,15 @@ DCSGOnPSG: MACRO
 	psgDriver:
 		dw 0
 
+	MapAttenuation:
+		ld a,d
+		and 0FH
+		add a,DCSGOnPSG_volumeMap & 0FFH
+		ld l,a
+		ld h,DCSGOnPSG_volumeMap >> 8
+		ld a,(hl)
+		ret
+
 	; a = value
 	SafeWriteRegister:
 		ld d,a
@@ -24,18 +33,14 @@ DCSGOnPSG: MACRO
 		add a,a
 		jr nc,Tone1FrequencyLow
 	Tone1Attenuation:
-		ld a,d
-		cpl
-		and 0FH
+		call MapAttenuation
 		ld e,8
 		jr WriteRegisterA
 	Register101:
 		add a,a
 		jr nc,Tone2FrequencyLow
 	Tone2Attenuation:
-		ld a,d
-		cpl
-		and 0FH
+		call MapAttenuation
 		ld e,9
 		jr WriteRegisterA
 	Register11:
@@ -45,16 +50,14 @@ DCSGOnPSG: MACRO
 		add a,a
 		jr nc,Tone3FrequencyLow
 	Tone3Attenuation:
-		ld a,d
-		cpl
+		call MapAttenuation
 		ld (WriteMixAndTone3Volume.tone3Volume),a
 		jr WriteMixAndTone3Volume
 	Register111:
 		add a,a
 		jr nc,NoiseControl
 	NoiseAttenuation:
-		ld a,d
-		cpl
+		call MapAttenuation
 		ld (WriteMixAndTone3Volume.noiseVolume),a
 		jr WriteMixAndTone3Volume
 
@@ -251,3 +254,7 @@ DCSGOnPSG_instance: DCSGOnPSG
 
 DCSGOnPSG_interface:
 	InterfaceOffset DCSGOnPSG.SafeWriteRegister
+
+	ALIGN_FIT8 16
+DCSGOnPSG_volumeMap:
+	db 15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 0

@@ -99,8 +99,8 @@ OPNBBOnNeotronOPNA_TryCreateOPNB:
 ; hl <- device interface
 ; f <- c: succeeded
 OPNBBOnNeotronOPNA_TryCreateOPNA:
-	call Drivers_TryCreateOPNA_IY
-	ld hl,OPNA_interface
+	call Drivers_TryCreateMakoto_IY
+	ld hl,Makoto_interface
 	ret
 
 ; ix = this

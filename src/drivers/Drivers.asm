@@ -23,7 +23,7 @@
 	INCLUDE "MmcsdSDCSG.asm"
 	INCLUDE "TurboRPCM.asm"
 	INCLUDE "OPN.asm"
-	INCLUDE "OPNA.asm"
+	INCLUDE "Makoto.asm"
 	INCLUDE "Neotron.asm"
 	INCLUDE "emulations/DCSGOnPSG.asm"
 	INCLUDE "emulations/DCSGSegaOnTI.asm"
@@ -80,8 +80,8 @@ Drivers: MACRO
 		StaticFactory TurboRPCM_instance, TurboRPCM_Construct, TurboRPCM_Destruct
 	opn:
 		StaticFactory OPN_instance, OPN_Construct, OPN_Destruct
-	opna:
-		StaticFactory OPNA_instance, OPNA_Construct, OPNA_Destruct
+	makoto:
+		StaticFactory Makoto_instance, Makoto_Construct, Makoto_Destruct
 	neotron:
 		StaticFactory Neotron_instance, Neotron_Construct, Neotron_Destruct
 	dcsgOnPSG:
@@ -315,8 +315,8 @@ Drivers_TryCreateOPN_IY:
 ; iy = this
 ; de <- driver
 ; f <- c: succeeded
-Drivers_TryCreateOPNA_IY:
-	ld bc,Drivers.opna
+Drivers_TryCreateMakoto_IY:
+	ld bc,Drivers.makoto
 	jr Drivers_TryCreate_IY_Trampoline
 
 ; iy = this

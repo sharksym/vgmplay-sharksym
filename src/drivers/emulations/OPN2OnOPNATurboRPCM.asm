@@ -215,9 +215,9 @@ NoOverflow:
 ; bc <- device direct interface
 ; f <- c: succeeded
 OPN2OnOPNATurboRPCM_TryCreateOPNA:
-	call Drivers_TryCreateOPNA_IY
-	ld hl,OPNA_interface
-	ld hl,OPNA_interfaceDirect
+	call Drivers_TryCreateMakoto_IY
+	ld hl,Makoto_interface
+	ld bc,Makoto_interfaceDirect
 	ret
 
 ; iy = drivers

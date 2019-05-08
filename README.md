@@ -74,15 +74,15 @@ Supported sound chips
   * SN76489 DCSG x2
     * Musical Memory Mapper, Playsoniq, Franky, MMC/SD Drive V4, PSG
   * YM2203 OPN x2
-    * OPNA, Neotron, Yamaha SFG + PSG
+    * Makoto, Neotron, Yamaha SFG + PSG
   * YM2608 OPNA
-    * OPNA, Yamaha SFG + PSG + MSX-AUDIO (no drums)
+    * Makoto, Yamaha SFG + PSG + MSX-AUDIO (no drums)
   * YM2610 OPNB
-    * Neotron, Yamaha SFG + PSG (no ADPCM)
+    * Neotron
   * YM2610B OPNB-B
-    * Neotron + OPNA
+    * Neotron + Makoto
   * YM2612 OPN2 x2
-    * OPNA + turboR PCM, Yamaha SFG + turboR PCM
+    * Makoto + turboR PCM, Yamaha SFG + turboR PCM
 
 
 Usage instructions

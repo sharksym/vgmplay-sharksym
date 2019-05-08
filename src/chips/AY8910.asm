@@ -71,8 +71,8 @@ AY8910_TryCreate:
 	call Drivers_TryCreateOPN_IY
 	ld hl,OPN_interface
 	ret c
-	call Drivers_TryCreateOPNA_IY
-	ld hl,OPNA_interface
+	call Drivers_TryCreateMakoto_IY
+	ld hl,Makoto_interface
 	ret c
 	call Drivers_TryCreateNeotron_IY
 	ld hl,Neotron_interface

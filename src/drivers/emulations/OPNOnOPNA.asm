@@ -46,8 +46,8 @@ OPNOnOPNA_Destruct: equ System_Return
 ; hl <- device interface
 ; f <- c: succeeded
 OPNOnOPNA_TryCreateOPNA:
-	call Drivers_TryCreateOPNA_IY
-	ld hl,OPNA_interface
+	call Drivers_TryCreateMakoto_IY
+	ld hl,Makoto_interface
 	ret c
 	call Drivers_TryCreateOPNOnSFGPSG_IY
 	ld hl,OPNOnSFGPSG_interface

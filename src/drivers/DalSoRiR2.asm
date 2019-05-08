@@ -17,8 +17,19 @@ DalSoRiR2: MACRO ?fmbase = DalSoRiR2_FM_BASE_PORT
 
 	SafeWriteRegister: equ super.SafeWriteRegister
 	SafeWriteRegister2: equ super.SafeWriteRegister2
-	SafeWriteRegisterWave: equ super.SafeWriteRegisterWave
 	ProcessRAMDataBlock: equ super.ProcessRAMDataBlock
+
+	; e = register
+	; d = value
+	SafeWriteRegisterWave:
+		ld a,e
+		cp OPL4_WAVE_MEMORY_CONTROL
+		jr nz,super.SafeWriteRegisterWave
+		ld a,d
+		and 00011100B
+		ld d,a
+		ld a,e
+		jr super.WriteRegisterWave
 
 	; dehl = size
 	; iy = reader
@@ -62,9 +73,7 @@ DalSoRiR2_ProcessROMDataBlock:
 	call DalSoRiR2_SetConfig
 	pop hl
 	pop de
-	call OPL4_ProcessROMDataBlock
-	ld de,00000000B << 8 | OPL4_WAVE_MEMORY_CONTROL
-	jp OPL4_WriteRegisterWave
+	jp OPL4_ProcessROMDataBlock
 
 ; a = configuration
 ; ix = this

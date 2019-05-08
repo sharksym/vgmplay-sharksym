@@ -101,9 +101,6 @@ YM2610_TryCreate: PROC
 NoYM2610B:
 	call Drivers_TryCreateNeotron_IY
 	ld hl,Neotron_interface
-	ret c
-	call Drivers_TryCreateOPNOnSFGPSG_IY
-	ld hl,OPNOnSFGPSG_interfaceYM2610
 	ret
 	ENDP
 

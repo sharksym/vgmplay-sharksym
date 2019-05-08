@@ -54,7 +54,7 @@ Player: MACRO
 Player_Construct:
 	ld (ix + Player.vgm),e
 	ld (ix + Player.vgm + 1),d
-	ld (ix + Player.loops),a
+	call Player_SetLoops
 	ld hl,Player_commandsJumpTable
 	call Scanner_Construct
 	push ix
@@ -145,7 +145,7 @@ LSBExtractionLoop:
 	ENDP
 
 ; ix = this
-Player_ConnectPCMWrite:
+Player_ConnectPCMWrite: PROC
 	call Utils_IsR800
 	ret nc
 	ld de,YM2612_instance
@@ -156,6 +156,59 @@ Loop:
 	djnz Loop
 	ld c,0E0H
 	jr Player_ConnectCommandInterface
+	ENDP
+
+; a = loops
+; ix = this
+Player_SetLoops: PROC
+	and a
+	jr z,Infinite
+	push ix
+	call Player_GetHeader
+	ex (sp),ix
+	pop iy
+	ld h,a
+	ld e,(iy + Header.loopModifier)
+	ld a,e
+	and a
+	jr nz,NonZeroModifier
+	ld e,10H
+NonZeroModifier:
+	call Math_Multiply8x8
+	ex de,hl
+	ld a,(iy + Header.loopBase)
+	add a,a
+	ld l,a
+	sbc a,a
+	ld h,a
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	ex de,hl
+	and a
+	sbc hl,de
+	ld de,8
+	add hl,de  ; round
+	add hl,hl
+	jr c,Clamp1
+	add hl,hl
+	jr c,Clamp255
+	add hl,hl
+	jr c,Clamp255
+	add hl,hl
+	jr c,Clamp255
+	ld (ix + Player.loops),h
+	ret
+Infinite:
+	ld (ix + Player.loops),0
+	ret
+Clamp1:
+	ld (ix + Player.loops),1
+	ret
+Clamp255:
+	ld (ix + Player.loops),255
+	ret
+	ENDP
 
 ; ix = this
 ; c = command
@@ -271,7 +324,7 @@ Player_ResetPosition:
 	jp MappedReader_SetPosition_IY
 
 ; f <- nz: exit condition occurred
-Player_CheckExitCondition:
+Player_CheckExitCondition: PROC
 	bit 0,(ix + Player.ended)
 	ret nz
 	ld a,(JIFFY)
@@ -279,14 +332,17 @@ Player_CheckExitCondition:
 	ret z
 	ld (ix + Player.lastJiffy),a
 	call DOS_ConsoleStatus  ; ctrl-c
+	and a
+	jr z,TryJoystick
+	call DOS_ConsoleInputWithoutEcho
+	or -1
+	ret
+TryJoystick:
 	ld a,(TRGFLG)
 	and 11110001B  ; space bar or joystick button
 	cp 11110001B
-	ret z
-	and 00000001B  ; space bar
-	call z,DOS_ConsoleInputWithoutEcho
-	or -1
 	ret
+	ENDP
 
 ; hl' = time remaining
 ; ix = this

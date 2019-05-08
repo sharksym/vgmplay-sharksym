@@ -74,6 +74,23 @@ NegativeInfinity:
 	ret
 	ENDP
 
+; h = multiplicand
+; e = multiplier
+; hl <- product
+; Modifies: af
+Math_Multiply8x8: PROC
+	ld d,0
+	ld l,d
+	ld b,8
+Loop:
+	add hl,hl
+	jr nc,NoAdd
+	add hl,de
+NoAdd:
+	djnz Loop
+	ret
+	ENDP
+
 ; hl = multiplicand
 ; bc = multiplier
 ; dehl <- product
