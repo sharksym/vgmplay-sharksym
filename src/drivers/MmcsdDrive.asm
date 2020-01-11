@@ -16,6 +16,18 @@ MMCSDv4_DetectSec:
 
 	SECTION TPA_PAGE0
 
+; a = slot
+MMCSDv4_EnableDCSG:
+	ld e,003H
+	ld hl,07C12H
+	jp Memory_WriteSlot
+
+; a = slot
+MMCSDv4_DisableDCSG:
+	ld e,002H
+	ld hl,07C12H
+	jp Memory_WriteSlot
+
 ; a = slot id
 ; f <- c: found
 MMCSDv4_MatchSlot: PROC

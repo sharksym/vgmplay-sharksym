@@ -15,7 +15,8 @@ MMCSDpDCSG_Construct:
 	call DCSG_Construct
 	call MMCSDp_Detect
 	jp nc,Driver_NotFound
-	call MMCSDpDCSG_SetSlot
+	ld (ix + MMCSDpDCSG.slot),a
+	call MMCSDv4_EnableDCSG
 	jp DCSG_Reset
 
 ; ix = this
@@ -23,13 +24,8 @@ MMCSDpDCSG_Destruct:
 	call Driver_IsFound
 	ret nc
 	call DCSG_Mute
-	ret
-
-; a = slot
-; ix = this
-MMCSDpDCSG_SetSlot:
-	ld (ix + MMCSDpDCSG.slot),a
-	ret
+	ld a,(ix + MMCSDpDCSG.slot)
+	jp MMCSDv4_DisableDCSG
 
 ; ix = this
 ; f <- c: found
