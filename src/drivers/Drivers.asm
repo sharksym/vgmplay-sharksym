@@ -18,6 +18,8 @@
 	INCLUDE "Franky.asm"
 	INCLUDE "PlaySoniq.asm"
 	INCLUDE "MMM.asm"
+	INCLUDE "TwavePDCSG.asm"
+	INCLUDE "TwaveSDCSG.asm"
 	INCLUDE "MmcsdDrive.asm"
 	INCLUDE "MmcsdPDCSG.asm"
 	INCLUDE "MmcsdSDCSG.asm"
@@ -72,6 +74,10 @@ Drivers: MACRO
 		StaticFactory PlaySoniq_instance, PlaySoniq_Construct, PlaySoniq_Destruct
 	mmm:
 		StaticFactory MMM_instance, MMM_Construct, MMM_Destruct
+	dcsgOnTwaveP:
+		StaticFactory TWAVEpDCSG_instance, TWAVEpDCSG_Construct, TWAVEpDCSG_Destruct
+	dcsgOnTwaveS:
+		StaticFactory TWAVEsDCSG_instance, TWAVEsDCSG_Construct, TWAVEsDCSG_Destruct
 	dcsgOnMmcsdP:
 		StaticFactory MMCSDpDCSG_instance, MMCSDpDCSG_Construct, MMCSDpDCSG_Destruct
 	dcsgOnMmcsdS:
@@ -282,6 +288,20 @@ Drivers_TryCreatePlaySoniq_IY:
 ; f <- c: succeeded
 Drivers_TryCreateMMM_IY:
 	ld bc,Drivers.mmm
+	jr Drivers_TryCreate_IY_Trampoline
+
+; iy = this
+; de <- driver
+; f <- c: succeeded
+Drivers_TryCreateDCSGOnTwaveP_IY:
+	ld bc,Drivers.dcsgOnTwaveP
+	jr Drivers_TryCreate_IY_Trampoline
+
+; iy = this
+; de <- driver
+; f <- c: succeeded
+Drivers_TryCreateDCSGOnTwaveS_IY:
+	ld bc,Drivers.dcsgOnTwaveS
 	jr Drivers_TryCreate_IY_Trampoline
 
 ; iy = this
