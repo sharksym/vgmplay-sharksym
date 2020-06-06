@@ -66,6 +66,12 @@ TI:
 	call Drivers_TryCreateMMM_IY
 	ld hl,MMM_interface
 	ret c
+	call Drivers_TryCreateDCSGOnTwaveP_IY
+	ld hl,TWAVEpDCSG_interface
+	ret c
+	call Drivers_TryCreateDCSGOnTwaveS_IY
+	ld hl,TWAVEsDCSG_interface
+	ret c
 	call Drivers_TryCreateDCSGOnMmcsdP_IY
 	ld hl,MMCSDpDCSG_interface
 	ret c
@@ -96,6 +102,12 @@ Sega:
 	ret c
 	call Drivers_TryCreateMMM_IY
 	ld hl,MMM_interface
+	ret c
+	call Drivers_TryCreateDCSGOnTwaveP_IY
+	ld hl,TWAVEpDCSG_interface
+	ret c
+	call Drivers_TryCreateDCSGOnTwaveS_IY
+	ld hl,TWAVEsDCSG_interface
 	ret c
 	call Drivers_TryCreateDCSGOnMmcsdP_IY
 	ld hl,MMCSDpDCSG_interface
