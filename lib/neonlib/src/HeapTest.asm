@@ -4,6 +4,9 @@
 HeapTest_Test:
 	ld ix,HeapTest_heap
 	call Heap_Construct
+	ld bc,HeapTest_heapSpace_SIZE
+	ld de,HeapTest_heapSpace
+	call Heap_Free
 	call HeapTest_TestCanAllocate
 	call HeapTest_TestAllocationSimple
 	call HeapTest_TestAllocationRounding
@@ -13,11 +16,11 @@ HeapTest_Test:
 
 HeapTest_TestCanAllocate:
 	; check available space
-	ld bc,(HeapTest_heap + Heap.capacity)
+	ld bc,HeapTest_heapSpace_SIZE
 	ld ix,HeapTest_heap
 	call Heap_CanAllocate
 	call nc,System_ThrowException
-	ld bc,(HeapTest_heap + Heap.capacity)
+	ld bc,HeapTest_heapSpace_SIZE
 	inc bc
 	ld ix,HeapTest_heap
 	call Heap_CanAllocate
@@ -26,7 +29,7 @@ HeapTest_TestCanAllocate:
 
 HeapTest_TestAllocationSimple:
 	; allocate entire heap
-	ld bc,(HeapTest_heap + Heap.capacity)
+	ld bc,HeapTest_heapSpace_SIZE
 	ld ix,HeapTest_heap
 	call Heap_Allocate
 	ld hl,HeapTest_heapSpace
@@ -49,10 +52,10 @@ HeapTest_TestAllocationSimple:
 	ld ix,HeapTest_heap
 	call Heap_GetFreeSpace
 	and a
-	ld hl,(HeapTest_heap + Heap.capacity)
+	ld hl,HeapTest_heapSpace_SIZE
 	sbc hl,bc
 	call nz,System_ThrowException
-	ld bc,(HeapTest_heap + Heap.capacity)
+	ld bc,HeapTest_heapSpace_SIZE
 	ld ix,HeapTest_heap
 	call Heap_CanAllocate
 	call nc,System_ThrowException
@@ -71,7 +74,7 @@ HeapTest_TestAllocationRounding:
 	ld ix,HeapTest_heap
 	call Heap_GetFreeSpace
 	and a
-	ld hl,(HeapTest_heap + Heap.capacity)
+	ld hl,HeapTest_heapSpace_SIZE
 	ld de,4
 	sbc hl,de
 	sbc hl,bc
@@ -83,7 +86,7 @@ HeapTest_TestAllocationRounding:
 	ld ix,HeapTest_heap
 	call Heap_GetFreeSpace
 	and a
-	ld hl,(HeapTest_heap + Heap.capacity)
+	ld hl,HeapTest_heapSpace_SIZE
 	sbc hl,bc
 	call nz,System_ThrowException
 	ret
@@ -105,7 +108,7 @@ HeapTest_TestAllocationFragmented:
 	ld ix,HeapTest_heap
 	call Heap_GetFreeSpace
 	and a
-	ld hl,(HeapTest_heap + Heap.capacity)
+	ld hl,HeapTest_heapSpace_SIZE
 	ld de,8
 	sbc hl,de
 	sbc hl,bc
@@ -136,7 +139,7 @@ HeapTest_TestAllocationFragmented:
 	pop bc
 	ld ix,HeapTest_heap
 	call Heap_Free
-	ld bc,(HeapTest_heap + Heap.capacity)
+	ld bc,HeapTest_heapSpace_SIZE
 	ld ix,HeapTest_heap
 	call Heap_CanAllocate
 	call nc,System_ThrowException
@@ -145,6 +148,10 @@ HeapTest_TestAllocationFragmented:
 HeapTest_TestAllocationAligned:
 	ld ix,HeapTest_alignedHeap
 	call Heap_Construct
+	ld ix,HeapTest_alignedHeap
+	ld bc,HeapTest_alignedHeapSpace_SIZE
+	ld de,HeapTest_alignedHeapSpace
+	call Heap_Free
 
 	ld bc,8
 	ld ix,HeapTest_alignedHeap
@@ -153,7 +160,7 @@ HeapTest_TestAllocationAligned:
 	and a
 	sbc hl,bc
 	call nz,System_ThrowException
-	ld hl,(HeapTest_alignedHeap + Heap.start)
+	ld hl,HeapTest_alignedHeapSpace
 	sbc hl,de
 	call nz,System_ThrowException
 
@@ -165,7 +172,7 @@ HeapTest_TestAllocationAligned:
 	and a
 	sbc hl,bc
 	call nz,System_ThrowException
-	ld hl,(HeapTest_alignedHeap + Heap.start)
+	ld hl,HeapTest_alignedHeapSpace
 	inc h
 	sbc hl,de
 	call nz,System_ThrowException
@@ -192,7 +199,7 @@ HeapTest_TestAllocationAligned:
 	and a
 	sbc hl,bc
 	call nz,System_ThrowException
-	ld hl,(HeapTest_alignedHeap + Heap.start)
+	ld hl,HeapTest_alignedHeapSpace
 	sbc hl,de
 	call nz,System_ThrowException
 
@@ -218,17 +225,19 @@ HeapTest_TestAllocationAligned:
 	SECTION RAM
 
 HeapTest_heap:
-	Heap HeapTest_heapSpace, 20H
+	Heap
 
 	ALIGN 4
+HeapTest_heapSpace_SIZE: equ 20H
 HeapTest_heapSpace:
-	ds 20H
+	ds HeapTest_heapSpace_SIZE
 
 HeapTest_alignedHeap:
-	Heap HeapTest_alignedHeapSpace, 120H
+	Heap
 
 	ALIGN 100H
+HeapTest_alignedHeapSpace_SIZE: equ 120H
 HeapTest_alignedHeapSpace:
-	ds 120H
+	ds HeapTest_alignedHeapSpace_SIZE
 
 	ENDS

@@ -4,6 +4,8 @@
 Mapper: MACRO
 	primaryMapperSlot:
 		db 0
+	mapperVariableTable:
+		dw 0
 	initialPage0:
 		db 0
 	initialPage1:
@@ -54,22 +56,17 @@ MapperSegment: MACRO
 
 ; ix = this
 ; ix <- this
-Mapper_Construct:
-	ld a,(HOKVLD)
-	bit 0,a
-	ld hl,Mapper_noMapperSupportError
-	jp z,System_ThrowExceptionWithMessage
-	push ix
-	ld a,0
-	ld de,0402H
-	call EXTBIO
-	pop ix
-	push hl
+Mapper_Construct: PROC
+	xor a
+	ld de,0401H
+	call BIOS_ExtendedBIOS
 	and a
-	ld hl,Mapper_noMapperSupportError
-	jp z,System_ThrowExceptionWithMessage
-	pop hl
-	ld (ix + Mapper.primaryMapperSlot),b
+	jr z,Throw
+	ld (ix + Mapper.primaryMapperSlot),a
+	ld (ix + Mapper.mapperVariableTable),l
+	ld (ix + Mapper.mapperVariableTable + 1),h
+	ld de,0402H
+	call BIOS_ExtendedBIOS
 	ld e,ixl
 	ld d,ixh
 	ld bc,Mapper.Allocate
@@ -85,6 +82,10 @@ Mapper_Construct:
 	call Mapper_instance.GetP2
 	ld (ix + Mapper.initialPage2),a
 	ret
+Throw:
+	ld hl,Mapper_noMapperSupportError
+	call System_ThrowExceptionWithMessage
+	ENDP
 
 ; ix = this
 ; ix <- this
@@ -106,14 +107,34 @@ Mapper_RestoreInitialState:
 	ld a,(ix + Mapper.initialPage0)
 	jp Mapper_instance.PutP0
 
+; a = slot
+; ix = this
+; f <- c: RAM
+; Modifies: f, b, de, hl
+Mapper_IsRAMSlot: PROC
+	ld b,a
+	ld l,(ix + Mapper.mapperVariableTable)
+	ld h,(ix + Mapper.mapperVariableTable + 1)
+	ld de,8
+Loop:
+	ld a,(hl)
+	and a
+	jr z,NotFound
+	cp b
+	jr z,Found
+	add hl,de
+	jr Loop
+Found:
+	scf
+NotFound:
+	ld a,b
+	ret
+	ENDP
+
 ; ix = this
 Mapper_PrintInfo: PROC
-	push ix
-	ld a,0
-	ld de,0401H
-	call EXTBIO
-	pop ix
-	ex de,hl
+	ld e,(ix + Mapper.mapperVariableTable)
+	ld d,(ix + Mapper.mapperVariableTable + 1)
 Loop:
 	ld a,(de)
 	inc de

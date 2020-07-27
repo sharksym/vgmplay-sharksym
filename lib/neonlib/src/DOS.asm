@@ -3,9 +3,10 @@
 ;
 REBOOT:   equ 0H
 BDOS:     equ 5H
+LOAD_FLAG: equ 37H
+FCB1:     equ 5CH
+FCB2:     equ 6CH
 DTA:      equ 80H
-HOKVLD:   equ 0FB20H
-EXTBIO:   equ 0FFCAH
 
 ; MSX-DOS function calls
 _TERM0:   equ 0H

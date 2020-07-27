@@ -18,6 +18,9 @@ Application_Main:
 
 	ld ix,Heap_main
 	call Heap_Construct
+	ld bc,HEAP_SIZE
+	ld de,HEAP
+	call Heap_Free
 
 	call WriterTest_Test
 	call CRC32CheckerTest_Test

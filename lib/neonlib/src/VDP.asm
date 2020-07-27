@@ -15,11 +15,9 @@ VDP_MODE_GRAPHIC1: equ 00000B
 VDP_MODE_TEXT1: equ 00001B
 VDP_MODE_TEXT2: equ 01001B
 
-;
 VDP_InitMirrorsOnVDPUpgrades: PROC
 	ld hl,IDBYT2
 	call System_ReadBIOS
-	and a
 	cp 1
 	jr c,MSX1
 	jr z,MSX2
@@ -236,12 +234,9 @@ VDP_EnableBlink: PROC
 	jp VDP_Fill
 	ENDP
 
-;
 ; Detect VDP version
-;
 ; a <- 0: TMS9918A, 1: V9938, 2: V9958, x: VDP ID
 ; f <- z: TMS9918A, nz: other
-;
 VDP_GetVersion:
 	call VDP_IsTMS9918A  ; use a different way to detect TMS9918A
 	ret z
@@ -264,17 +259,13 @@ VDP_GetVersion:
 	inc a                ; return 1 for V9938
 	ret
 
-;
 ; Test if the VDP is a TMS9918A.
-;
 ; The VDP ID number was only introduced in the V9938, so we have to use a
 ; different method to detect the TMS9918A. We wait for the vertical blanking
 ; interrupt flag, and then quickly read status register 2 and expect bit 6
 ; (VR, vertical retrace flag) to be set as well. The TMS9918A has only one
 ; status register, so bit 6 (5S, 5th sprite flag) will return 0 in stead.
-;
 ; f <- z: TMS9918A, nz: V99X8
-;
 VDP_IsTMS9918A: PROC
 	in a,(VDP_PORT_1)    ; read s#0, make sure interrupt flag is reset
 	di

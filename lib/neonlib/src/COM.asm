@@ -50,6 +50,6 @@ HEAP: ds VIRTUAL HEAP_SIZE
 	SECTION RAM
 
 Heap_main:
-	Heap HEAP, HEAP_SIZE
+	Heap
 
 	ENDS

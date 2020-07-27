@@ -4,7 +4,7 @@
 
 ; h = memory page
 ; a <- slot ID formatted FxxxSSPP
-; Modifies: af, bc, de, hl
+; Modifies: f, bc, de
 Memory_GetSlot: PROC
 	in a,(0A8H)
 	bit 7,h
@@ -25,7 +25,6 @@ PrimaryShiftDone:
 	ex de,hl
 	ld hl,EXPTBL
 	add hl,bc
-	ld c,a
 	ld a,(hl)
 	and 80H
 	or c
@@ -144,18 +143,15 @@ Memory_SetSlot:
 	ei
 	ret
 
-;
 ; Sets a prepared slot selection.
 ; The current interrupt enabled state is preserved.
 ; The original slot layout can be restored by invoking this method again.
 ; Note, primary slots will be set to the state they were in when prepared.
-;
 ; bc = Prepared slot id (1)
 ; de = Prepared slot id (2)
 ; bc <- Prepared slot id (1) to restore
 ; de <- Prepared slot id (2) to restore
 ; Modifies: af, bc, de, hl
-;
 Memory_SetPreparedSlot:
 	push bc
 	ld hl,0FFFFH
@@ -179,10 +175,8 @@ Memory_SetPreparedSlot:
 
 	SECTION TPA_PAGE1
 
-;
 ; Sets a prepared slot selection in page 0.
 ; See SetPreparedSlot.
-;
 Memory_SetPreparedSlotPage0:
 	push bc
 	ld hl,0FFFFH
@@ -316,15 +310,12 @@ InterruptsDisabled:
 	jp CALSLT
 	ENDP
 
-;
 ; Search all slots and subslots for a match.
 ; Invoke Continue to continue searching where a previous search left off.
-;
 ; hl = detection routine (receives a = slot ID, can modify all)
 ; f <- c: found
 ; a <- slot number
 ; Modifies: af, bc, de
-;
 Memory_SearchSlots: PROC
 	ld a,0
 PrimaryLoop:
@@ -360,21 +351,18 @@ Found:
 	ret
 	ENDP
 
-;
 ; Match a string in a slot.
-;
 ; a = slot
 ; bc = string length
 ; de = string
 ; hl = address
 ; f <- c: found
 ; Modifies: f, bc, de, hl
-;
 Memory_MatchSlotString: PROC
 	push af
 	push bc
 	push de
-	call RDSLT
+	call Memory_ReadSlot
 	pop de
 	pop bc
 	ex de,hl

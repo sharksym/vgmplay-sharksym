@@ -59,6 +59,6 @@ CRC32Table:
 	SECTION RAM
 
 Heap_main:
-	Heap HEAP, HEAP_SIZE
+	Heap
 
 	ENDS

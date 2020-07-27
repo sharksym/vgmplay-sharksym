@@ -114,17 +114,58 @@ TRGFLG: equ 0F3E8H
 FORCLR: equ 0F3E9H
 BAKCLR: equ 0F3EAH
 BDRCLR: equ 0F3EBH
+HOKVLD: equ 0FB20H
 NEWKEY: equ 0FBE5H
 HIMEM: equ 0FC4AH
 JIFFY: equ 0FC9EH
 INTCNT: equ 0FCA2H
 EXPTBL: equ 0FCC1H
 SLTTBL: equ 0FCC5H
+PROCNM: equ 0FD89H
 H.KEYI: equ 0FD9AH
 H.TIMI: equ 0FD9FH
 H.MDIN: equ 0FF75H
 H.MDTM: equ 0FF93H
+EXTBIO: equ 0FFCAH
 
 PPI_PORT_A: equ 0A8H
 PPI_PORT_B: equ 0A9H
 PPI_PORT_C: equ 0AAH
+
+; d = device ID
+; e = function call
+; Modifies: depends on function call, alternate & index registers preserved
+BIOS_ExtendedBIOS: PROC
+	ex af,af'
+	exx
+	push af
+	push bc
+	push de
+	push hl
+	ld a,(HOKVLD)
+	bit 0,a
+	jr z,Throw
+	exx
+	ex af,af'
+	push ix
+	push iy
+	call EXTBIO
+	pop iy
+	pop ix
+	ex af,af'
+	exx
+	pop hl
+	pop de
+	pop bc
+	pop af
+	exx
+	ex af,af'
+	ret
+Throw:
+	ld hl,BIOS_noExtendedBIOSError
+	call System_ThrowExceptionWithMessage
+	ENDP
+
+;
+BIOS_noExtendedBIOSError:
+	db "No extended BIOS available.",13,10,0

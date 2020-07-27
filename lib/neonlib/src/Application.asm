@@ -9,6 +9,9 @@ Application_Main:
 
 	ld ix,Heap_main
 	call Heap_Construct
+	ld bc,HEAP_SIZE
+	ld de,HEAP
+	call Heap_Free
 
 	ld hl,Application_testing
 	call System_Print
