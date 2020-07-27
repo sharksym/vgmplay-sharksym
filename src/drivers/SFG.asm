@@ -158,6 +158,8 @@ SFG_Detect:
 ; a = slot id
 ; f <- c: found
 SFG_MatchID:
+	call Utils_IsNotRAMSlot
+	ret nc
 	ld de,SFG_id
 	ld hl,SFG_ID_ADDRESS
 	ld bc,6

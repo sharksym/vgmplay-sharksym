@@ -1,4 +1,7 @@
+source lib/neonlib/tools/symbols.tcl
 source lib/neonlib/tools/profile.tcl
+
+symbols::load bin/vgmplay.sym
 
 ext debugdevice
 set debugoutput stdout
@@ -13,5 +16,6 @@ diskmanipulator import virtual_drive bin/
 virtual_drive eject
 hda /tmp/vgmplay.dsk
 
+set maxframeskip 100
 set throttle off
 after time 12 "set throttle on"

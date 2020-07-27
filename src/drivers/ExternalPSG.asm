@@ -71,6 +71,8 @@ ExternalPSG_Detect:
 ; a = slot id
 ; f <- c: found
 ExternalPSG_MatchMFRSDID:
+	call Utils_IsNotRAMSlot
+	ret nc
 	ld de,ExternalPSG_mfrsdId
 	ld hl,ExternalPSG_MFRSD_ID_ADDRESS
 	ld bc,5

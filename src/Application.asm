@@ -49,6 +49,9 @@ Application_MainContinue:
 
 	ld ix,Heap_main
 	call Heap_Construct
+	ld bc,HEAP_SIZE
+	ld de,HEAP
+	call Heap_Free
 
 	call Player_InitCommandsJumpTable
 
@@ -396,11 +399,8 @@ Application_CheckStack:
 ; Check if the heap capacity matches the free space
 Application_CheckMemoryLeak:
 	ld ix,Heap_main
-	ld l,(ix + Heap.capacity)
-	ld h,(ix + Heap.capacity + 1)
-	push hl
 	call Heap_GetFreeSpace
-	pop hl
+	ld hl,HEAP_SIZE
 	and a
 	sbc hl,bc
 	call nz,System_ThrowException
@@ -414,7 +414,7 @@ Application_instance: Application
 	ENDS
 
 Application_welcome:
-	db "VGMPlay 1.2 by Grauw",13,10,10,0
+	db "VGMPlay 1.3s1 by Grauw",13,10,10,0
 
 Application_loadingFile:
 	db "Loading ",0

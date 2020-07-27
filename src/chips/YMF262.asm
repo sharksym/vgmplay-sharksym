@@ -79,9 +79,7 @@ YMF262_TryCreate:
 	call Drivers_TryCreateOPL3_IY
 	ld hl,OPL3_interface
 	ret c
-	call Drivers_TryCreateMoonSound_IY
-	ld hl,MoonSound_interface
-	ret
+	jp YMF278B_TryCreate
 
 ;
 	SECTION RAM

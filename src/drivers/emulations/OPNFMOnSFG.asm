@@ -330,7 +330,7 @@ OPNFMOnSFG_WriteSFGRegister:
 	ld bc,OPNFMOnSFG.WriteRegister.WriteSFGRegister
 	jp Utils_JumpIXOffsetBC
 
-; de = offset; 65536 * (log2((7159090 / 2^11 / 144) / 27.5) + 8/12 + 0.5/12/64)
+; de = offset; 65536 * (log2((7159091 / 2^11 / 144) / 27.5) + 8/12 + 0.5/12/64)
 ;                             frequency               A0      A-C#   rounding
 ; ix = this
 OPNFMOnSFG_SetFrequencyOffset:
@@ -359,7 +359,7 @@ OPNFMOnSFG_BlockFNumToFloat:
 	ld b,a
 	ret
 
-; de = offset; 65536 * (log2((7159090 / 2^11 / 144) / 27.5) + 8/12 + 0.5/12/64)
+; de = offset; 65536 * (log2((7159091 / 2^11 / 144) / 27.5) + 8/12 + 0.5/12/64)
 ;                             frequency               A0      A-C#   rounding
 ; b.hl = octave.fraction (OPN)
 ; b.hl <- octave.fraction (OPM)

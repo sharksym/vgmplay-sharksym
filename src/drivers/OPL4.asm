@@ -31,9 +31,10 @@ OPL4: MACRO ?fmbase, ?wavebase, ?name
 	; a = register
 	; d = value
 	WriteRegister:
+		di
 		out (?fmbase + OPL4_FM_ADDRESS),a
-		nop     ; wait 56 cycles (5.9 bus cycles)
-		ld a,d
+		ld a,d  ; wait 56 / 33.87 µs
+		ei
 		out (?fmbase + OPL4_FM_DATA),a
 		ret
 	MaskControl:
@@ -48,9 +49,10 @@ OPL4: MACRO ?fmbase, ?wavebase, ?name
 	; a = register
 	; d = value
 	WriteRegister2:
+		di
 		out (?fmbase + OPL4_FM2_ADDRESS),a
-		nop     ; wait 56 cycles (5.9 bus cycles)
-		ld a,d
+		ld a,d  ; wait 56 / 33.87 µs
+		ei
 		out (?fmbase + OPL4_FM2_DATA),a
 		ret
 
@@ -65,7 +67,7 @@ OPL4: MACRO ?fmbase, ?wavebase, ?name
 	WriteRegisterWave:
 		out (?wavebase + OPL4_WAVE_ADDRESS),a
 	waveAddressPort: equ $ - 1
-		cp (ix)  ; wait 88 cycles (9.3 bus cycles, but 9 works)
+		cp (ix)  ; wait 88 / 33.87 µs (9.3 bus cycles, but 9 works)
 		ld a,d
 		out (?wavebase + OPL4_WAVE_DATA),a
 	waveDataPort: equ $ - 1
@@ -75,7 +77,7 @@ OPL4: MACRO ?fmbase, ?wavebase, ?name
 	; a <- value
 	ReadRegisterWave:
 		out (?wavebase + OPL4_WAVE_ADDRESS),a
-		cp (ix)  ; wait 88 cycles (9.3 bus cycles, but 9 works)
+		cp (ix)  ; wait 88 / 33.87 µs (9.3 bus cycles, but 9 works)
 		nop
 		in a,(?wavebase + OPL4_WAVE_DATA)
 		ret
@@ -274,7 +276,7 @@ OPL4_WriteMemory: PROC
 	ld a,OPL4_WAVE_MEMORY_DATA
 	ld c,(ix + OPL4.waveAddressPort)
 	out (c),a
-	nop  ; wait 88 cycles (9.3 bus cycles, but 9 works)
+	nop  ; wait 88 / 33.87 µs (9.3 bus cycles, but 9 works)
 	ld c,(ix + OPL4.waveDataPort)
 Loop:
 	otir

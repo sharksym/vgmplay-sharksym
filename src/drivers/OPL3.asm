@@ -8,7 +8,7 @@ OPL3_FM_DATA: equ 01H
 OPL3_FM2_ADDRESS: equ 02H
 OPL3_FM2_DATA: equ 03H
 OPL3_FM2_NEW: equ 05H
-OPL3_CLOCK: equ 14318181
+OPL3_CLOCK: equ 14318182
 OPL3_TIMER_1: equ 02H
 OPL3_FLAG_CONTROL: equ 04H
 
@@ -25,15 +25,25 @@ OPL3: MACRO ?base = OPL3_BASE_PORT, ?name = OPL3_name
 	; a = register
 	; d = value
 	WriteRegister:
+		di
 		out (?base + OPL3_FM_ADDRESS),a
-		jp $ + 3     ; wait 32 cycles (8 bus cycles)
+	basePort: equ $ - 1
+		cp (hl)      ; wait 32 / 14.32 µs
 		ld a,d
+		ei
 		out (?base + OPL3_FM_DATA),a
 		ret
 	MaskControl:
 		cp 8H
 		jr z,WriteRegister
-		ret
+		cp 1H
+		ret nz
+	MaskTest:
+		ld a,d
+		and 00100000B  ; pass waveform select enable for OPL2s
+		ld d,a
+		ld a,e
+		jr WriteRegister
 
 	; e = register
 	; d = value
@@ -42,9 +52,11 @@ OPL3: MACRO ?base = OPL3_BASE_PORT, ?name = OPL3_name
 	; a = register
 	; d = value
 	WriteRegister2:
+		di
 		out (?base + OPL3_FM2_ADDRESS),a
-		jp $ + 3     ; wait 32 cycles (8 bus cycles)
+		cp (hl)      ; wait 32 / 14.32 µs
 		ld a,d
+		ei
 		out (?base + OPL3_FM2_DATA),a
 		ret
 
@@ -131,6 +143,8 @@ OPL3_Reset:
 	ld b,0D6H
 	ld de,0020H
 	call OPL3_FillRegisterPairs
+	ld de,0001H
+	call OPL3_WriteRegister
 	ld de,0008H
 	call OPL3_WriteRegister
 	ld de,0004H
@@ -141,33 +155,47 @@ OPL3_Reset:
 ; ix = this
 ; f <- c: Found
 OPL3_Detect:
-	call OPL3_ReadRegisterStatus
+	ld c,(ix + OPL3.basePort)
+; c = base I/O port
+; f <- c: Found
+; c <- base I/O port
+OPL3_DetectPort: PROC
+	in a,(c)
 	and 11111101B  ; if OPL4 bit 1 can be set
 	ret nz
 	di
 	ld de,10000000B << 8 | OPL3_FLAG_CONTROL
-	call OPL3_WriteRegister
+	call WriteRegister
 	ld de,0FFH << 8 | OPL3_TIMER_1  ; detect with timer
-	call OPL3_WriteRegister
+	call WriteRegister
 	ld de,00111001B << 8 | OPL3_FLAG_CONTROL
-	call OPL3_WriteRegister
+	call WriteRegister
 	ld de,10000000B << 8 | MSXAudio_ADPCM_CONTROL  ; ensure it’s no MSX-AUDIO
-	call OPL3_WriteRegister
+	call WriteRegister
 	ld b,0  ; wait >80 µs
 	djnz $
-	call OPL3_ReadRegisterStatus
+	in a,(c)
 	push af
 	ld de,01111000B << 8 | OPL3_FLAG_CONTROL
-	call OPL3_WriteRegister
-	ei
+	call WriteRegister
 	ld de,00000000B << 8 | MSXAudio_ADPCM_CONTROL
-	call OPL3_WriteRegister
+	call WriteRegister
+	ei
 	pop af
 	and 11111101B  ; if OPL4 bit 1 can be set
 	xor 11000000B
 	ret nz
 	scf
 	ret
+WriteRegister:
+	out (c),e
+	in a,(c)  ; wait 12 / 3.58 µs (in case of MSX-AUDIO)
+	cp (hl)   ;  "
+	inc c
+	out (c),d
+	dec c
+	ret
+	ENDP
 
 ;
 	SECTION RAM

@@ -22,12 +22,12 @@ MSXMusic: MACRO
 	; d = value
 	WriteRegister:
 		out (MSXMusic_ADDRESS),a
-		in a,(MSXMusic_ADDRESS)  ; wait 12 cycles
+		in a,(MSXMusic_ADDRESS)  ; wait 12 / 3.58 µs
 		in a,(MSXMusic_ADDRESS)  ;  "
 		ld a,d
 		out (MSXMusic_DATA),a
-		in a,(09AH)  ; R800 wait: ~72 cycles
-		in a,(09AH)
+		in a,(09AH)  ; wait 84 / 3.58 µs
+		in a,(09AH)  ; R800: 72 / 7.16 µs
 		ret
 	ENDM
 
@@ -91,7 +91,7 @@ MSXMusic_FillRegisters:
 	push bc
 	push de
 	call MSXMusic_WriteRegister
-	in a,(09AH)  ; R800 wait: ~62 cycles - 5 (ret)
+	in a,(09AH)  ; R800: ~62 - 5 (ret) / 7.16 µs
 	pop de
 	pop bc
 	inc e
@@ -137,6 +137,8 @@ MSXMusic_Detect:
 ; a = slot id
 ; f <- c: found
 MSXMusic_MatchInternalID:
+	call Utils_IsNotRAMSlot
+	ret nc
 	ld de,MSXMusic_internalId
 	ld hl,MSXMusic_ID_ADDRESS
 	ld bc,8
@@ -146,6 +148,8 @@ MSXMusic_MatchInternalID:
 ; ix = this
 ; f <- c: found
 MSXMusic_MatchExternalID:
+	call Utils_IsNotRAMSlot
+	ret nc
 	ld de,MSXMusic_externalId
 	ld hl,MSXMusic_ID_ADDRESS + 4
 	ld bc,4

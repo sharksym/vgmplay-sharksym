@@ -40,7 +40,6 @@ PSG: MACRO ?base, ?name = PSG_name
 	ReadRegister:
 		di
 		out (?base + PSG_ADDRESS),a
-		ld a,d
 		ei
 		in a,(?base + PSG_READ)
 		ret

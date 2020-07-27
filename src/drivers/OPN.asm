@@ -19,7 +19,7 @@ OPN: MACRO
 	; d = value
 	WriteRegister: PROC
 		out (OPN_ADDRESS),a
-		in a,(OPN_ADDRESS)  ; wait 17 cycles
+		in a,(OPN_ADDRESS)  ; wait 17 / 3.58 µs
 		in a,(OPN_ADDRESS)
 		or (hl)
 		ld a,d

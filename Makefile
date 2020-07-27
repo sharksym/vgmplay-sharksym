@@ -5,9 +5,8 @@ all:
 	java -jar tools/glass.jar -I gen -I lib/neonlib/src -I lib/gunzip/src src/COM.asm bin/vgmplay.com bin/vgmplay.sym
 
 dist: all
-	cp README.md CHANGES.md LICENSE bin/
 	rm -f bin/vgmplay.zip
-	cd bin && zip vgmplay.zip vgmplay.com README.md CHANGES.md LICENSE
+	zip -j bin/vgmplay.zip bin/vgmplay.com README.md CHANGES.md LICENSE
 
 copy: all
 	cp bin/vgmplay.com $(COPY_TARGET)/

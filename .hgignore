@@ -1,5 +1,7 @@
 ^gen/
 ^bin/
+^bin2/
+^.vscode/
 
 ^.project$
 ^.externalToolBuilders/

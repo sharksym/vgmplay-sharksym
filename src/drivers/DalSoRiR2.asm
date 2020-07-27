@@ -4,10 +4,10 @@
 DalSoRiR2_FM_BASE_PORT: equ 0C4H
 DalSoRiR2_WAVE_BASE_PORT: equ 07EH
 
-DalSoRi_CONFIG: equ 6700H
-DalSoRi_C0_ENABLE: equ 01H
-DalSoRi_C4_ENABLE: equ 02H
-DalSoRi_YRW801_DISABLE: equ 20H
+DalSoRiR2_CONFIG: equ 6700H
+DalSoRiR2_C0_ENABLE: equ 01H
+DalSoRiR2_C4_ENABLE: equ 02H
+DalSoRiR2_YRW801_DISABLE: equ 20H
 
 DalSoRiR2: MACRO ?fmbase = DalSoRiR2_FM_BASE_PORT
 	this:
@@ -59,7 +59,7 @@ Loop:
 	sub c
 	cp 2
 	jr c,Loop
-	ld a,DalSoRi_C4_ENABLE
+	ld a,DalSoRiR2_C4_ENABLE
 	jr DalSoRiR2_SetConfig  ; re-enable YRW801 ROM
 	ENDP
 
@@ -69,7 +69,7 @@ Loop:
 DalSoRiR2_ProcessROMDataBlock:
 	push de
 	push hl
-	ld a,DalSoRi_YRW801_DISABLE | DalSoRi_C4_ENABLE
+	ld a,DalSoRiR2_YRW801_DISABLE | DalSoRiR2_C4_ENABLE
 	call DalSoRiR2_SetConfig
 	pop hl
 	pop de
@@ -80,7 +80,7 @@ DalSoRiR2_ProcessROMDataBlock:
 DalSoRiR2_SetConfig:
 	ld e,a
 	ld a,(ix + DalSoRiR2.slot)
-	ld hl,DalSoRi_CONFIG
+	ld hl,DalSoRiR2_CONFIG
 	jp Memory_WriteSlot
 
 ; ix = this
@@ -97,12 +97,12 @@ DalSoRiR2_Detect:
 	and a
 	ret
 
-	SECTION TPA_PAGE0
-
 ; a = slot id
 ; ix = this
 ; f <- c: found
 DalSoRiR2_MatchSlot: PROC
+	call Utils_IsNotRAMSlot
+	ret nc
 	ld bc,8
 	ld de,DalSoRiR2_emptyID
 	ld hl,4000H
@@ -115,36 +115,21 @@ DalSoRiR2_MatchSlot: PROC
 	ret nc
 Continue:
 	ld (ix + DalSoRiR2.slot),a
-	di
-	ld hl,DalSoRi_CONFIG
-	call Memory_ReadSlot
-	push af
 	xor a
 	call DalSoRiR2_SetConfig  ; disable all ports
 	call OPL4_Detect
 	jr c,NotFound
-	ld a,DalSoRi_C4_ENABLE
+	ld a,DalSoRiR2_C4_ENABLE
 	call DalSoRiR2_SetConfig  ; enable C4 port
 	call OPL4_Detect
 	jr nc,NotFound
 Found:
-	pop af
-	ei
 	scf
 	ret
 NotFound:
-	pop af
-	call DalSoRiR2_SetConfig
-	ei
 	and a
 	ret
 	ENDP
-
-	IF $ > 4000H
-		ERROR "Must not be in page 1."
-	ENDIF
-
-	ENDS
 
 ;
 	SECTION RAM

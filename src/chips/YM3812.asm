@@ -53,13 +53,8 @@ YM3812_Connect:
 ; de <- driver
 ; hl <- device interface
 ; f <- c: succeeded
-YM3812_TryCreate:
-	call Drivers_TryCreateOPL3_IY
-	ld hl,OPL3_interface
-	ret c
-	call Drivers_TryCreateMoonSound_IY
-	ld hl,MoonSound_interface
-	ret
+YM3812_TryCreate: equ YMF262_TryCreate
+;	jp YMF262_TryCreate
 
 ;
 	SECTION RAM

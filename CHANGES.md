@@ -2,13 +2,14 @@ VGMPlay MSX change log
 ======================
 
 For the complete list of changes please refer to the
-[revision history](https://bitbucket.org/grauw/vgmplay-msx/commits/all).
+[revision history](https://hg.sr.ht/~grauw/vgmplay-msx/log).
 
-[1.3] — 2019-??-??
+[1.3] — 2020-07-26
 ------------------
 
   * New chips: YM2203 OPN, YM2608 OPNA, YM2610 OPNB, YM2610B OPNB-B, YM2612 OPN2
   * New sound expansions: Makoto, Neotron, Darky, DalSoRi R2, OPL3 (C0H)
+  * New timer: 1130 Hz if a MoonSound or OPL3 is present
   * Emulation of SN76489 DCSG on PSG
   * Emulation of YM2203 OPN, YM2608 OPNA and YM2612 OPN2 on Yamaha SFG
   * Translation of YM2612 OPN2 frequencies to correct tuning
@@ -63,6 +64,7 @@ For the complete list of changes please refer to the
 Initial release.
 
 
-[1.2]: https://bitbucket.org/grauw/vgmplay-msx/commits/tag/release-1.2
-[1.1]: https://bitbucket.org/grauw/vgmplay-msx/commits/tag/release-1.1
-[1.0]: https://bitbucket.org/grauw/vgmplay-msx/commits/tag/release-1.0
+[1.3]: https://hg.sr.ht/~grauw/vgmplay-msx/log?rev=release-1.3
+[1.2]: https://hg.sr.ht/~grauw/vgmplay-msx/log?rev=release-1.2
+[1.1]: https://hg.sr.ht/~grauw/vgmplay-msx/log?rev=release-1.1
+[1.0]: https://hg.sr.ht/~grauw/vgmplay-msx/log?rev=release-1.0

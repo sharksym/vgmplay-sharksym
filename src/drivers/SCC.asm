@@ -149,6 +149,8 @@ SCC_Detect:
 ; a = slot id
 ; f <- c: found
 SCC_MatchSlot: PROC
+	call Utils_IsNotRAMSlot
+	ret nc
 	ex af,af'
 	ld h,SCC_BANK_SELECT >> 8
 	call Memory_GetSlot

@@ -57,12 +57,7 @@ YM3526_TryCreate:
 	call Drivers_TryCreateMSXAudio_IY
 	ld hl,MSXAudio_interface
 	ret c
-	call Drivers_TryCreateOPL3_IY
-	ld hl,OPL3_interface
-	ret c
-	call Drivers_TryCreateMoonSound_IY
-	ld hl,MoonSound_interface
-	ret
+	jp YM3812_TryCreate
 
 ;
 	SECTION RAM

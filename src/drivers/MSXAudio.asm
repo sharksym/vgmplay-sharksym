@@ -51,12 +51,13 @@ MSXAudio: MACRO
 	; d = value
 	WriteRegister:
 		out (MSXAudio_ADDRESS_PORT),a
-		in a,(MSXAudio_STATUS_PORT)  ; wait 12 cycles
+	basePort: equ $ - 1
+		in a,(MSXAudio_STATUS_PORT)  ; wait 12 / 3.58 µs
 		ld a,(hl)                    ;  "
 		ld a,d
 		out (MSXAudio_DATA_PORT),a
-		in a,(09AH)  ; R800 wait: ~72 cycles
-		in a,(09AH)
+		in a,(09AH)  ; wait 84 / 3.58 µs
+		in a,(09AH)  ; R800: 72 / 7.16 µs
 		ret
 	MaskControl:
 		ld hl,safeControlMirror
@@ -129,20 +130,20 @@ MSXAudio: MACRO
 		ld b,c
 		ld c,MSXAudio_DATA_PORT
 		ld a,MSXAudio_ADPCM_DATA
-		out (MSXAudio_ADDRESS_PORT),a  ; wait 12 cycles after
+		out (MSXAudio_ADDRESS_PORT),a  ; wait 12 / 3.58 µs after
 		jr Wait
 	Next:
-		in a,(MSXAudio_STATUS_PORT)  ; wait 12 cycles
+		in a,(MSXAudio_STATUS_PORT)  ; wait 12 / 3.58 µs
 		ld a,MSXAudio_FLAG_CONTROL
 		out (MSXAudio_ADDRESS_PORT),a
-		in a,(MSXAudio_STATUS_PORT)  ; wait 12 cycles
+		in a,(MSXAudio_STATUS_PORT)  ; wait 12 / 3.58 µs
 		ld a,(hl)                    ;  "
-		ld a,80H
+		ld a,11110000B
 		out (MSXAudio_DATA_PORT),a
-		in a,(MSXAudio_STATUS_PORT)  ; wait 12 cycles
+		in a,(MSXAudio_STATUS_PORT)  ; wait 12 / 3.58 µs
 		ld a,(hl)                    ;  "
 		ld a,MSXAudio_ADPCM_DATA
-		out (MSXAudio_ADDRESS_PORT),a  ; wait 12 cycles after
+		out (MSXAudio_ADDRESS_PORT),a  ; wait 12 / 3.58 µs after
 	Wait:
 		in a,(MSXAudio_STATUS_PORT)
 		and 00001000B
@@ -202,7 +203,7 @@ MSXAudio_FillRegisters:
 	push bc
 	push de
 	call MSXAudio_SafeWriteRegister
-	in a,(09AH)  ; R800 wait: ~62 cycles - 5 (ret)
+	in a,(09AH)  ; R800: ~62 - 5 (ret) / 7.16 µs
 	pop de
 	pop bc
 	inc e
@@ -325,13 +326,18 @@ MSXAudio_WriteADPCMData:
 
 ; ix = this
 ; f <- c: found
-MSXAudio_Detect: PROC
-	in a,(MSXAudio_STATUS_PORT)
+MSXAudio_Detect:
+	ld c,(ix + MSXAudio.basePort)
+; c = base I/O port
+; f <- c: Found
+; c <- base I/O port
+MSXAudio_DetectPort: PROC
+	in a,(c)
 	and 11111001B
 	ret nz
 	ld de,10000000B << 8 | MSXAudio_ADPCM_CONTROL
 	call WriteRegister
-	in a,(MSXAudio_STATUS_PORT)
+	in a,(c)
 	and 11111001B
 	push af
 	ld de,00000000B << 8 | MSXAudio_ADPCM_CONTROL
@@ -342,14 +348,12 @@ MSXAudio_Detect: PROC
 	scf
 	ret
 WriteRegister:
-	ld a,e
-	out (MSXAudio_ADDRESS_PORT),a
-	ld b,8  ; wait 12 cycles
-	djnz $
-	ld a,d
-	out (MSXAudio_DATA_PORT),a
-	ld b,8  ; wait 12 cycles
-	djnz $
+	out (c),e
+	in a,(c)  ; wait 12 / 3.58 µs
+	cp (hl)   ;  "
+	inc c
+	out (c),d
+	dec c
 	ret
 	ENDP
 

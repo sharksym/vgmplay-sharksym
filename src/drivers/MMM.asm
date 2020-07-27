@@ -85,6 +85,8 @@ MMM_Detect:
 ; a = slot id
 ; f <- c: found
 MMM_MatchSlot: PROC
+	call Utils_IsRAMSlot
+	ret nc
 	ld c,a
 	ld b,0CH
 	call TestValue
@@ -102,6 +104,8 @@ MMM_MatchSlot: PROC
 	ret nz
 	ld a,c
 	and 83H
+	call Utils_IsRAMSlot
+	ret c
 	ld de,MMM_carnivoreId
 	ld hl,MMM_CARNIVORE_ID_ADDRESS
 	ld bc,8

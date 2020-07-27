@@ -51,6 +51,8 @@ Makoto: MACRO
 		ret z              ; mask IRQ control
 		cp 2DH
 		ret nc             ; block access to the prescaler
+		cp 10H
+		jr z,WriteRhythmKey
 	; a = register
 	; d = value
 	WriteRegister: PROC
@@ -61,7 +63,7 @@ Makoto: MACRO
 		jr c,Wait
 		ld a,e
 		out (Makoto_FM1_ADDRESS),a
-		jp $ + 3  ; wait 17 cycles (7.6 bus cycles)
+		jp $ + 3  ; wait 17 / 8.00 µs
 		ld a,d
 		out (Makoto_FM1_DATA),a
 		ret
@@ -72,6 +74,11 @@ Makoto: MACRO
 		ld d,a
 		ld a,e
 		jr WriteRegister
+	WriteRhythmKey:
+		call WriteRegister  ; call modified to jp if Z80
+		ld b,100
+		djnz $  ; wait 576 / 8.00 µs
+		ret
 
 	; e = register
 	; d = value
@@ -89,7 +96,7 @@ Makoto: MACRO
 		jr c,Wait
 		ld a,e
 		out (Makoto_FM2_ADDRESS),a
-		jp $ + 3  ; wait 17 cycles (7.6 bus cycles)
+		jp $ + 3  ; wait 17 / 8.00 µs
 		ld a,d
 		out (Makoto_FM2_DATA),a
 		ret
@@ -179,20 +186,15 @@ Makoto: MACRO
 		ld b,c
 		ld c,Makoto_FM2_DATA
 		ld a,Makoto_ADPCM_DATA
-		out (Makoto_FM2_ADDRESS),a  ; wait 12 cycles after
+		out (Makoto_FM2_ADDRESS),a
 		jr Wait
 	Next:
-		in a,(Makoto_STATUS1)  ; wait 12 cycles
 		ld a,Makoto_FLAG_CONTROL
 		out (Makoto_FM2_ADDRESS),a
-		in a,(Makoto_STATUS1)  ; wait 12 cycles
-		ld a,(hl)            ;  "
-		ld a,80H
+		ld a,11110000B
 		out (Makoto_FM2_DATA),a
-		in a,(Makoto_STATUS1)  ; wait 12 cycles
-		ld a,(hl)            ;  "
 		ld a,Makoto_ADPCM_DATA
-		out (Makoto_FM2_ADDRESS),a  ; wait 12 cycles after
+		out (Makoto_FM2_ADDRESS),a
 	Wait:
 		in a,(Makoto_STATUS1)
 		and 00001000B
@@ -221,7 +223,11 @@ Makoto_Construct:
 	call Driver_Construct
 	call Makoto_Detect
 	jp nc,Driver_NotFound
-	jr Makoto_Reset
+	call Makoto_Reset
+	call Utils_IsR800
+	ret c
+	ld (ix + Makoto.WriteRhythmKey),0C3H  ; jp, optimisation for Z80
+	ret
 
 ; ix = this
 Makoto_Destruct:
