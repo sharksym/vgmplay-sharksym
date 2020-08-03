@@ -414,7 +414,7 @@ Application_instance: Application
 	ENDS
 
 Application_welcome:
-	db "VGMPlay 1.3s1 by Grauw",13,10,10,0
+	db "VGMPlay 1.3s2 by Grauw",13,10,10,0
 
 Application_loadingFile:
 	db "Loading ",0
