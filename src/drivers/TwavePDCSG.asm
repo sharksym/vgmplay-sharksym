@@ -42,13 +42,13 @@ TWAVEpDCSG_Detect:
 	out (040h),a
 	in a,(040h)
 	cp 027h
-	jr nz,TWAVEpDCSG_Detect_done
 	ld a,001h				; enable pri (clone mode)
 	out (041h),a
-	scf
-TWAVEpDCSG_Detect_done:
 	ld a,0
 	out (040h),a
+	scf
+	ret z
+	xor a
 	ret
 
 ;

@@ -42,13 +42,13 @@ TWAVEsDCSG_Detect:
 	out (040h),a
 	in a,(040h)
 	cp 027h
-	jr nz,TWAVEsDCSG_Detect_done
 	ld a,003h				; enable pri & sec (dual mode)
 	out (041h),a
-	scf
-TWAVEsDCSG_Detect_done:
 	ld a,0
 	out (040h),a
+	scf
+	ret z
+	xor a
 	ret
 
 ;
