@@ -226,7 +226,7 @@ MSXAudio_Mute:
 	ld de,00A0H
 	call MSXAudio_FillRegisters  ; frequency 0
 	ld b,09H
-	ld de,00A0H
+	ld de,00B0H
 	jr MSXAudio_FillRegisters    ; key off
 
 ; ix = this
