@@ -130,7 +130,7 @@ Darky_Detect:
 	out (c),b
 	in a,(c)
 	cpl
-	cp Darky_DEVICE_ID
+	cp b
 	out (c),e
 	scf
 	ret z
