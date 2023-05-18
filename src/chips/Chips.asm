@@ -34,6 +34,7 @@
 	INCLUDE "K053260.asm"
 	INCLUDE "Pokey.asm"
 	INCLUDE "QSound.asm"
+	INCLUDE "SAA1099.asm"
 
 Chips: MACRO
 	chips:
@@ -69,6 +70,7 @@ Chips: MACRO
 		StaticFactory K053260_instance, K053260_Construct, K053260_Destruct
 		StaticFactory Pokey_instance, Pokey_Construct, Pokey_Destruct
 		StaticFactory QSound_instance, QSound_Construct, QSound_Destruct
+		StaticFactory SAA1099_instance, SAA1099_Construct, SAA1099_Destruct
 	COUNT: equ ($ - chips) / StaticFactory._size
 	ENDM
 

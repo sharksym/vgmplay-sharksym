@@ -120,8 +120,14 @@ Header: MACRO
 		dd 0
 	extraHeaderOffset:
 		dd 0
+	wonderSwanClock:
+		dd 0
+	virtualBoyVSUClock:
+		dd 0
+	saa1099Clock:
+		dd 0
 	reserved:
-		dd 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		dd 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	_size:
 	ENDM
 

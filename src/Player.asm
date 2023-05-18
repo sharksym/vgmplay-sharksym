@@ -713,7 +713,7 @@ Player_commandsJumpTable:
 	dw Player_Skip3               ; BAH
 	dw Player_Skip3               ; BBH
 	dw Player_Skip3               ; BCH
-	dw Player_Skip3               ; BDH
+	dw SAA1099_instance.ProcessCommand             ; BDH
 	dw Player_Skip3               ; BEH
 	dw Player_Skip3               ; BFH
 	dw Player_Skip4               ; C0H
