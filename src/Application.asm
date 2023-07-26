@@ -47,6 +47,9 @@ Application_MainContinue:
 	ld hl,Application_welcome
 	call System_Print
 
+	ld hl,Application_sharksym
+	call System_Print
+
 	ld ix,Heap_main
 	call Heap_Construct
 	ld bc,HEAP_SIZE
@@ -414,8 +417,7 @@ Application_instance: Application
 	ENDS
 
 Application_welcome:
-	db "VGMPlay 1.3 by Grauw",13,10
-	db "<sharksym build 2023-03-24>",13,10,10,0
+	db "VGMPlay 1.3 by Grauw",13,10,10,0
 
 Application_loadingFile:
 	db "Loading ",0
@@ -438,3 +440,6 @@ Application_usageInstructions:
 	db "Options:",13,10
 	db "  /l  Number of playback loops. Default: 2.",13,10
 	db "  /b  Enter blackout mode during playback.",13,10,0
+
+Application_sharksym:
+	db 30, "<sharksym build 2023-03-24>",13,10,10,0
