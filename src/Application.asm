@@ -442,4 +442,4 @@ Application_usageInstructions:
 	db "  /b  Enter blackout mode during playback.",13,10,0
 
 Application_sharksym:
-	db 30, "<sharksym build 2023-03-24>",13,10,10,0
+	db 30, "<sharksym build 2023-07-26>",13,10,10,0
