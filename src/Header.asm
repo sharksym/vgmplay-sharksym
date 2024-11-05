@@ -210,12 +210,8 @@ Header_GetDataOffset: PROC
 	add hl,bc
 	jr nc,Pre1_50
 	ld de,Header.vgmDataOffset
-	call Utils_GetDoubleWordIXOffset
-	ld bc,34H
-	add hl,bc
-	ret nc
-	inc de
-	ret
+	call Header_GetRelativeOffset
+	ret nz
 Pre1_50:
 	ld de,0
 	ld hl,40H
@@ -227,23 +223,24 @@ Pre1_50:
 ; f <- z: no loop
 Header_GetLoopOffset:
 	ld de,Header.loopOffset
-	call Utils_GetDoubleWordIXOffset
-	ret z
-	ld bc,1CH
-	add hl,bc
-	ret nc
-	inc de
-	and a
-	ret
+	jr Header_GetRelativeOffset
 
 ; ix = this
-; dehl <- loop offset
-; f <- z: no loop
+; dehl <- GD3 offset
+; f <- z: no GD3
 Header_GetGD3Offset:
 	ld de,Header.gd3Offset
+	jr Header_GetRelativeOffset
+
+; de = header offset
+; ix = this
+; dehl <- absolute offset
+; f <- z: no header
+Header_GetRelativeOffset:
+	push de
 	call Utils_GetDoubleWordIXOffset
+	pop bc
 	ret z
-	ld bc,14H
 	add hl,bc
 	ret nc
 	inc de
