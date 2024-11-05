@@ -146,6 +146,7 @@ Header_Construct:
 	ld hl,Header_noVGMFileError
 	call nz,System_ThrowExceptionWithMessage
 	call Header_ClearPastDataOffset
+	call Header_ClearPastExtraHeaderOffset
 	jr Header_FixPre102
 
 ; ix = this
@@ -155,6 +156,17 @@ Header_Destruct: equ System_Return
 ; ix = this
 Header_ClearPastDataOffset:
 	call Header_GetDataOffset
+	jr Header_ClearPastOffset
+
+; ix = this
+Header_ClearPastExtraHeaderOffset:
+	call Header_GetExtraHeaderOffset
+	ret z
+	jr Header_ClearPastOffset
+
+; dehl = offset
+; ix = this
+Header_ClearPastOffset:
 	ld a,d
 	or e
 	or h
@@ -231,6 +243,24 @@ Header_GetLoopOffset:
 Header_GetGD3Offset:
 	ld de,Header.gd3Offset
 	jr Header_GetRelativeOffset
+
+; ix = this
+; dehl <- extra header offset
+; f <- z: no extra header
+Header_GetExtraHeaderOffset: PROC
+	ld l,(ix + Header.version)
+	ld h,(ix + Header.version + 1)
+	ld bc,-170H
+	add hl,bc
+	jr nc,Pre1_70
+	ld de,Header.extraHeaderOffset
+	jr Header_GetRelativeOffset
+Pre1_70:
+	ld de,0
+	ld hl,0
+	xor a
+	ret
+	ENDP
 
 ; de = header offset
 ; ix = this
