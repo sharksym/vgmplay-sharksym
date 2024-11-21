@@ -51,11 +51,12 @@ RAM: equ RAM_PAGE1
 
 	; gunzip
 	INCLUDE "GzipArchive.asm"
+	INCLUDE "CRC32Checker.asm"
 	INCLUDE "deflate/Inflate.asm"
+	INCLUDE "deflate/Decoder.asm"
 	INCLUDE "deflate/Alphabet.asm"
 	INCLUDE "deflate/Branch.asm"
-	INCLUDE "deflate/FixedAlphabets.asm"
-	INCLUDE "deflate/DynamicAlphabets.asm"
+	INCLUDE "deflate/HuffmanCodes.asm"
 	INCLUDE "Reader.asm"
 	INCLUDE "Writer.asm"
 	INCLUDE "FileReader.asm"

@@ -27,6 +27,11 @@ Application: MACRO
 	_size:
 	ENDM
 
+FileReader_class: Class FileReader, FileReader_template, Heap_main
+FileReader_template: FileReader
+GzipArchive_class: Class GzipArchive, GzipArchive_template, Heap_main
+GzipArchive_template: GzipArchive
+
 ;
 Application_Main:
 	ld ix,Mapper_instance
@@ -286,14 +291,29 @@ Application_InflateFile:
 	ld d,ixh
 	ex (sp),ix
 	push ix
+	push de
+	push ix
+	ld ix,Heap_main
+	ld bc,Decoders._size
+	call Heap_Allocate
+	ld c,e
+	ld b,d
+	pop ix
+	pop de
+	push bc
 	ld hl,GzipArchive_Extract
 	call System_TryCall
+	pop de
+	push ix
+	ld ix,Heap_main
+	ld bc,Decoders._size
+	call Heap_Free
+	pop ix
 	pop ix
 	ex (sp),ix
 	call Mapped32KWriter_Destruct
 	call Mapped32KWriter_class.Delete
 	pop ix
-	call GzipArchive_Destruct
 	call GzipArchive_class.Delete
 	pop ix
 	call FileReader_Destruct
