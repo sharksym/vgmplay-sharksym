@@ -1,7 +1,7 @@
 source lib/neonlib/tools/symbols.tcl
 source lib/neonlib/tools/profile.tcl
 
-symbols::load bin/vgmplay.sym
+symbols::load gen/vgmplay.sym
 
 ext debugdevice
 set debugoutput stdout

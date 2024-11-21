@@ -1,8 +1,8 @@
 COPY_TARGET = /Volumes/MSXDOS2
 
 all:
-	mkdir -p bin
-	java -jar tools/glass.jar -I gen -I lib/neonlib/src -I lib/gunzip/src src/COM.asm bin/vgmplay.com bin/vgmplay.sym
+	mkdir -p gen bin
+	java -jar tools/glass.jar -I gen -I lib/neonlib/src -I lib/gunzip/src src/COM.asm bin/vgmplay.com gen/vgmplay.sym
 
 dist: all
 	rm -f bin/vgmplay.zip
