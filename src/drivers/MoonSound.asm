@@ -3,15 +3,10 @@
 ;
 MoonSound_FM_BASE_PORT: equ 0C4H
 MoonSound_WAVE_BASE_PORT: equ 07EH
-MoonSound_WAVENUMBERMAP_SIZE: equ 512
 
 MoonSound: MACRO ?fmbase = MoonSound_FM_BASE_PORT
 	this:
 	super: OPL4 ?fmbase, MoonSound_WAVE_BASE_PORT, MoonSound_name
-	waveNumberMap:
-		dw 0
-	waveNumberMSB:
-		ds 24
 
 	SafeWriteRegister: equ super.SafeWriteRegister
 	SafeWriteRegister2: equ super.SafeWriteRegister2
@@ -24,29 +19,14 @@ MoonSound: MACRO ?fmbase = MoonSound_FM_BASE_PORT
 		cp 38H
 		jr nc,super.SafeWriteRegisterWave
 		cp 20H
-		jr c,LSB
-	MSB:
-		ld c,a
-		ld b,0
-		ld hl,waveNumberMSB - 20H
-		add hl,bc
-		ld (hl),d
-		set 0,d
-		jr super.SafeWriteRegisterWave
+		jr nc,MSB
 	LSB:
-		cp 8H
+		cp 08H
 		jr c,super.SafeWriteRegisterWave
-		ld c,a
-		ld b,0
-		ld hl,waveNumberMSB - 8H
-		add hl,bc
-		ld a,(hl)
-		and 1
-		ld c,d
-		ld b,a
-		ld hl,(waveNumberMap)
-		add hl,bc
-		ld d,(hl)
+		set 7,d
+		jr super.SafeWriteRegisterWave
+	MSB:
+		set 0,d
 		jr super.SafeWriteRegisterWave
 		ENDP
 
@@ -74,39 +54,18 @@ MoonSound_Construct:
 
 ; ix = this
 MoonSound_Destruct:
-	call OPL4_Destruct
-	ld e,(ix + MoonSound.waveNumberMap)
-	ld d,(ix + MoonSound.waveNumberMap + 1)
-	ld a,e
-	or d
-	ret z
-	push ix
-	ld bc,MoonSound_WAVENUMBERMAP_SIZE
-	ld ix,Heap_main
-	call Heap_Free
-	pop ix
-	ret
+	equ OPL4_Destruct
 
 ; dehl = size
 ; ix = this
 ; iy = reader
-MoonSound_ProcessROMDataBlock:
+MoonSound_ProcessROMDataBlock: PROC
 	call OPL4_ProcessROMDataBlockHeader
 	ret z
 	exx
 	set 5,e
 	call OPL4_LoadSampleFromReader
 	exx
-	jr MoonSound_FixUpWaveHeaders
-
-; dehl = size
-; ix = this
-; iy = reader
-MoonSound_ProcessRAMDataBlock: equ OPL4_ProcessRAMDataBlock
-;	jp OPL4_ProcessRAMDataBlock
-
-; ix = this
-MoonSound_FixUpWaveHeaders: PROC
 	ld b,128
 	ld de,0020H
 	ld hl,0000H
@@ -119,43 +78,15 @@ Loop:
 	add hl,bc
 	pop bc
 	djnz Loop
-	jr MoonSound_EnableWaveNumberMapping
-	ENDP
-
-; ix = this
-MoonSound_EnableWaveNumberMapping:
-	call MoonSound_InitialiseWaveNumberMap
 	ld (ix + MoonSound.SafeWriteRegisterWave + 1),0
 	ret
-
-; ix = this
-MoonSound_InitialiseWaveNumberMap: PROC
-	ld e,(ix + MoonSound.waveNumberMap)
-	ld d,(ix + MoonSound.waveNumberMap + 1)
-	ld a,e
-	or d
-	call z,Allocate
-	ld bc,2 | 00 << 8  ; 512
-	ld a,0
-Loop:
-	or 80H
-	ld (de),a
-	inc a
-	inc de
-	djnz Loop
-	dec c
-	jr nz,Loop
-	ret
-Allocate:
-	push ix
-	ld bc,MoonSound_WAVENUMBERMAP_SIZE
-	ld ix,Heap_main
-	call Heap_Allocate
-	pop ix
-	ld (ix + MoonSound.waveNumberMap),e
-	ld (ix + MoonSound.waveNumberMap + 1),d
-	ret
 	ENDP
+
+; dehl = size
+; ix = this
+; iy = reader
+MoonSound_ProcessRAMDataBlock:
+	equ OPL4_ProcessRAMDataBlock
 
 ; ix = this
 ; iy = drivers
