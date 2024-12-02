@@ -18,13 +18,8 @@ MoonSound: MACRO ?fmbase = MoonSound_FM_BASE_PORT
 
 	; e = register
 	; d = value
-	SafeWriteRegisterWave:
-		jp super.SafeWriteRegisterWave
-	mapWaveNumber: equ $ - 2
-
-	; e = register
-	; d = value
-	MapWaveNumber: PROC
+	SafeWriteRegisterWave: PROC
+		jr super.SafeWriteRegisterWave  ; overwritten to jr $ + 2 when mapping wave numbers
 		ld a,e
 		cp 38H
 		jr nc,super.SafeWriteRegisterWave
@@ -72,6 +67,7 @@ MoonSound: MACRO ?fmbase = MoonSound_FM_BASE_PORT
 ; iy = drivers
 MoonSound_Construct:
 	call Driver_Construct
+	ld (ix + MoonSound.SafeWriteRegisterWave + 1),MoonSound.super.SafeWriteRegisterWave - (MoonSound.SafeWriteRegisterWave + 2)
 	call MoonSound_Detect
 	jp nc,Driver_NotFound
 	jp OPL4_Reset
@@ -129,12 +125,7 @@ Loop:
 ; ix = this
 MoonSound_EnableWaveNumberMapping:
 	call MoonSound_InitialiseWaveNumberMap
-	ld e,ixl
-	ld d,ixh
-	ld hl,MoonSound.MapWaveNumber
-	add hl,de
-	ld (ix + MoonSound.mapWaveNumber),l
-	ld (ix + MoonSound.mapWaveNumber + 1),h
+	ld (ix + MoonSound.SafeWriteRegisterWave + 1),0
 	ret
 
 ; ix = this
