@@ -28,10 +28,6 @@ MappedWriter_Construct:
 	jr MappedWriter_AllocateNextSegment
 
 ; ix = this
-MappedWriter_Destruct: equ Writer_Destruct
-;	jp Writer_Destruct
-
-; ix = this
 ; de <- buffer
 ; ix <- buffer
 MappedWriter_GetBuffer:
@@ -53,8 +49,8 @@ MappedWriter_Flush:
 	pop ix
 	pop de
 	pop bc
-	ld l,(ix + MappedWriter.super.bufferEnd)
-	ld h,(ix + MappedWriter.super.bufferEnd + 1)
+	ld l,0
+	ld h,(ix + MappedWriter.super.bufferEnd)
 	and a
 	sbc hl,de
 	call c,System_ThrowException
@@ -65,7 +61,7 @@ MappedWriter_Flush:
 
 ; ix = this
 MappedWriter_AllocateNextSegment:
-	ld h,(ix + MappedWriter.super.bufferStart + 1)
+	ld h,(ix + MappedWriter.super.bufferStart)
 	push ix
 	push hl
 	call MappedWriter_GetBuffer

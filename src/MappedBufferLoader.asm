@@ -39,7 +39,6 @@ MappedBufferLoader_Destruct:
 	push ix
 	call MappedBufferLoader_GetWriter
 	call Writer_FinishBlock
-	call MappedWriter_Destruct
 	pop ix
 	ret
 
