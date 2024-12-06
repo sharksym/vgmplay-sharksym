@@ -1,12 +1,11 @@
 ;
-; Writer backed by a mapped buffer
+; Mapped buffer writer for gzip inflate
 ;
 Mapped32KWriter_BASE_ADDRESS: equ 4000H
 Mapped32KWriter_SEGMENT_SIZE: equ 4000H
 Mapped32KWriter_BUFFER_SIZE: equ 8000H
 
 Mapped32KWriter: MACRO
-	super: Writer
 	buffer:
 		dw 0
 	originalPage1: MapperSegment
@@ -23,11 +22,6 @@ Mapped32KWriter_template: Mapped32KWriter
 Mapped32KWriter_Construct:
 	ld (ix + Mapped32KWriter.buffer),e
 	ld (ix + Mapped32KWriter.buffer + 1),d
-	ld hl,Mapped32KWriter_BASE_ADDRESS
-	ld bc,Mapped32KWriter_BUFFER_SIZE
-	ld de,Mapped32KWriter_Flush
-	call Writer_Construct
-
 	ld h,40H
 	call Mapper_instance.GetPH
 	ld (ix + Mapped32KWriter.originalPage1.segment),a
@@ -38,7 +32,6 @@ Mapped32KWriter_Construct:
 	ld (ix + Mapped32KWriter.originalPage2.segment),a
 	call Memory_GetSlot
 	ld (ix + Mapped32KWriter.originalPage2.slot),a
-
 	push ix
 	call Mapped32KWriter_GetBuffer
 	call MappedBuffer_AllocateAndAddSegment
@@ -73,21 +66,11 @@ Mapped32KWriter_GetBuffer:
 	ld ixh,d
 	ret
 
-; bc = byte count
+; hl = byte count
 ; de = buffer start
 ; ix = this
-; Modifies: af, hl
-Mapped32KWriter_Flush:
-	push bc
-	push de
-	call Mapped32KWriter_CopyToMappedBuffer
-	pop de
-	pop bc
-	ret
-
-; ix = this
 Mapped32KWriter_CopyToMappedBuffer: PROC
-	push bc
+	push hl
 	push de
 	push ix
 	call Mapped32KWriter_GetBuffer

@@ -46,7 +46,6 @@ RAM: equ RAM_PAGE1
 	INCLUDE "MappedBuffer.asm"
 	INCLUDE "MappedBufferLoader.asm"
 	INCLUDE "MappedReader.asm"
-	INCLUDE "MappedWriter.asm"
 	INCLUDE "Mapped32KWriter.asm"
 
 	; gunzip
@@ -58,7 +57,7 @@ RAM: equ RAM_PAGE1
 	INCLUDE "deflate/Branch.asm"
 	INCLUDE "deflate/HuffmanCodes.asm"
 	INCLUDE "Reader.asm"
-	INCLUDE "Writer.asm"
+	INCLUDE "BitReader.asm"
 	INCLUDE "FileReader.asm"
 
 	ENDS

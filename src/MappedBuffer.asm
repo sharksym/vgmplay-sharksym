@@ -150,20 +150,20 @@ MappedBuffer_AddSegment:
 	pop ix
 	ret
 
-; bc = size to add
+; hl = size to add
 ; ix = this
 MappedBuffer_IncreaseSize:
-	ld l,(ix + MappedBuffer.size)
-	ld h,(ix + MappedBuffer.size + 1)
-	ld e,(ix + MappedBuffer.size + 2)
-	ld d,(ix + MappedBuffer.size + 3)
+	push hl
+	ld c,(ix + MappedBuffer.size)
+	ld b,(ix + MappedBuffer.size + 1)
 	add hl,bc
 	ld (ix + MappedBuffer.size),l
 	ld (ix + MappedBuffer.size + 1),h
+	pop hl
 	ret nc
-	inc de
-	ld (ix + MappedBuffer.size + 2),e
-	ld (ix + MappedBuffer.size + 3),d
+	inc (ix + MappedBuffer.size + 2)
+	ret nz
+	inc (ix + MappedBuffer.size + 3)
 	ret
 
 ; dehl = position

@@ -267,7 +267,7 @@ Application_IsVGZ:
 	ret
 
 ; ix = this
-Application_InflateFile:
+Application_InflateFile: PROC
 	push ix
 	call Application_GetCLI
 	call CLI_GetFileInfoBlock
@@ -279,9 +279,18 @@ Application_InflateFile:
 	push ix
 	call FileReader_class.New
 	call FileReader_Construct
-	ld e,ixl
-	ld d,ixh
 	push ix
+	push ix
+	push ix
+	ld ix,Heap_main
+	ld bc,Decoders._size
+	call Heap_Allocate
+	ld c,e
+	ld b,d
+	pop ix
+	pop hl
+	push bc
+	ld de,Mapped32KWriter_BASE_ADDRESS
 	ld a,GZIP_CRC32 ? -1 : 0
 	call GzipArchive_class.New
 	call GzipArchive_Construct
@@ -293,18 +302,14 @@ Application_InflateFile:
 	ld d,ixh
 	ex (sp),ix
 	push ix
-	push de
-	push ix
-	ld ix,Heap_main
-	ld bc,Decoders._size
-	call Heap_Allocate
-	ld c,e
-	ld b,d
-	pop ix
-	pop de
-	push bc
-	ld hl,GzipArchive_Extract
+	ld hl,InflateLoop
 	call System_TryCall
+	pop ix
+	ex (sp),ix
+	call Mapped32KWriter_Destruct
+	call Mapped32KWriter_class.Delete
+	pop ix
+	call GzipArchive_class.Delete
 	pop de
 	push ix
 	ld ix,Heap_main
@@ -312,16 +317,24 @@ Application_InflateFile:
 	call Heap_Free
 	pop ix
 	pop ix
-	ex (sp),ix
-	call Mapped32KWriter_Destruct
-	call Mapped32KWriter_class.Delete
-	pop ix
-	call GzipArchive_class.Delete
-	pop ix
 	call FileReader_Destruct
 	call FileReader_class.Delete
 	pop ix
 	jp System_Rethrow
+; de = mapped writer
+; ix = gzip archive
+InflateLoop:
+	push de
+	call GzipArchive_Inflate
+	ex (sp),ix
+	push af
+	call Mapped32KWriter_CopyToMappedBuffer
+	pop af
+	ex (sp),ix
+	pop de
+	jr nz,InflateLoop
+	ret
+	ENDP
 
 ; ix = this
 Application_PrintLoading:
