@@ -7,7 +7,9 @@ MappedReader: MACRO
 	super: Reader
 	buffer:
 		dw 0
-	positionSegmentIndex:
+	bufferStart:
+		db 0
+	segmentIndex:
 		dw -1
 	_size:
 	ENDM
@@ -21,52 +23,47 @@ MappedReader_Construct:
 	and a
 	call nz,System_ThrowException
 	ld a,h
-	and 3FH
+	and (MappedReader_SEGMENT_SIZE >> 8) - 1
 	call nz,System_ThrowException
-	ld (ix + MappedReader.buffer),e
+	ld (ix + MappedReader.buffer + 0),e
 	ld (ix + MappedReader.buffer + 1),d
-	ld bc,MappedReader_SEGMENT_SIZE
-	ld de,MappedReader_Fill_IY
+	ld (ix + MappedReader.bufferStart),h
+	ld de,MappedReader_Supply_IY
 	jp Reader_Construct
 
 ; iy = this
-; de <- buffer
 ; ix <- buffer
+; Modifies: bc
 MappedReader_GetBuffer_IY:
-	ld e,(iy + MappedReader.buffer)
-	ld d,(iy + MappedReader.buffer + 1)
-	ld ixl,e
-	ld ixh,d
+	ld c,(iy + MappedReader.buffer + 0)
+	ld b,(iy + MappedReader.buffer + 1)
+	ld ixl,c
+	ld ixh,b
 	ret
 
 ; dehl = address
 ; iy = this
 MappedReader_SetPosition_IY:
 	push ix
-	ld c,e
-	ld b,d
 	call MappedReader_GetBuffer_IY
-	ld e,c
-	ld d,b
 	call MappedBuffer_IsValidPosition
 	call nc,MappedReader_ThrowAddressOutOfBounds
 	ld a,h
-	and 3FH
-	or 80H
-	ld (iy + MappedReader.super.bufferPosition),l
-	ld (iy + MappedReader.super.bufferPosition + 1),a
-	ld a,h
-	rla
+	and (MappedReader_SEGMENT_SIZE >> 8) - 1
+	add a,(iy + MappedReader.bufferStart)
+	ld (iy + MappedReader.super.address + 0),l
+	ld (iy + MappedReader.super.address + 1),a
+	rl h
 	rl e
 	rl d
 	call c,MappedReader_ThrowAddressOutOfBounds
-	rla
+	rl h
 	rl e
 	rl d
 	call c,MappedReader_ThrowAddressOutOfBounds
-	ld (iy + MappedReader.positionSegmentIndex),e
-	ld (iy + MappedReader.positionSegmentIndex + 1),d
-	ld h,(iy + MappedReader.super.bufferStart)
+	ld (iy + MappedReader.segmentIndex + 0),e
+	ld (iy + MappedReader.segmentIndex + 1),d
+	ld h,a
 	call MappedBuffer_SelectSegment
 	pop ix
 	ret
@@ -74,13 +71,13 @@ MappedReader_SetPosition_IY:
 ; iy = this
 ; dehl <- address
 MappedReader_GetPosition_IY: PROC
-	ld l,(iy + MappedReader.super.bufferPosition)
-	ld h,(iy + MappedReader.super.bufferPosition + 1)
-	ld e,(iy + MappedReader.positionSegmentIndex)
-	ld d,(iy + MappedReader.positionSegmentIndex + 1)
+	ld l,(iy + MappedReader.super.address + 0)
+	ld h,(iy + MappedReader.super.address + 1)
+	ld e,(iy + MappedReader.segmentIndex + 0)
+	ld d,(iy + MappedReader.segmentIndex + 1)
 	ld a,h
 	cp (iy + MappedReader.super.bufferEnd)
-	call nc,FillPending
+	call nc,SupplyPending
 	rlc h
 	rlc h
 	srl d
@@ -90,9 +87,9 @@ MappedReader_GetPosition_IY: PROC
 	rr e
 	rr h
 	ret
-FillPending:
+SupplyPending:
 	ld l,0
-	ld h,(iy + MappedReader.super.bufferStart)
+	ld h,(iy + MappedReader.bufferStart)
 	inc de
 	ret
 	ENDP
@@ -134,32 +131,27 @@ Loop:
 	jr Loop
 	ENDP
 
-; bc = byte count
 ; de = buffer start
+; hl = buffer size
 ; iy = this
 ; Modifies: af, hl
-MappedReader_Fill_IY:
-	push bc
-	push de
+MappedReader_Supply_IY:
 	call MappedReader_SelectNextSegment_IY
-	pop de
-	pop bc
+	ld e,0
+	ld d,(iy + MappedReader.bufferStart)
+	ld hl,MappedReader_SEGMENT_SIZE
 	ret
 
 ; iy = this
 MappedReader_SelectNextSegment_IY:
-	ld e,(iy + MappedReader.positionSegmentIndex)
-	ld d,(iy + MappedReader.positionSegmentIndex + 1)
+	ld e,(iy + MappedReader.segmentIndex + 0)
+	ld d,(iy + MappedReader.segmentIndex + 1)
 	inc de
-	ld (iy + MappedReader.positionSegmentIndex),e
-	ld (iy + MappedReader.positionSegmentIndex + 1),d
+	ld (iy + MappedReader.segmentIndex + 0),e
+	ld (iy + MappedReader.segmentIndex + 1),d
 	push ix
-	ld c,e
-	ld b,d
 	call MappedReader_GetBuffer_IY
-	ld h,(iy + MappedReader.super.bufferStart)
-	ld e,c
-	ld d,b
+	ld h,(iy + MappedReader.bufferStart)
 	call MappedBuffer_SelectSegment
 	pop ix
 	ret

@@ -58,7 +58,7 @@ RAM: equ RAM_PAGE1
 	INCLUDE "deflate/HuffmanCodes.asm"
 	INCLUDE "Reader.asm"
 	INCLUDE "BitReader.asm"
-	INCLUDE "FileReader.asm"
+	INCLUDE "FileSupplier.asm"
 
 	ENDS
 

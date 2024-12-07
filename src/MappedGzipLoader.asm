@@ -7,12 +7,16 @@ MappedGzipLoader_BUFFER_END: equ MappedGzipLoader_BUFFER_START + MappedGzipLoade
 MappedGzipLoader_SEGMENT_SIZE: equ 4000H
 
 MappedGzipLoader: MACRO
+	fileHandle:
+		db 0FFH
 	buffer:
 		dw 0
 	decoders:
 		dw 0
-	fileReader:
-		FileReader
+	fileSupplier:
+		FileSupplier
+	bitReader:
+		BitReader
 	gzipArchive:
 		GzipArchive
 	_size:
@@ -35,13 +39,22 @@ MappedGzipLoader_Construct:
 	pop ix
 	ld (ix + MappedGzipLoader.decoders + 0),e
 	ld (ix + MappedGzipLoader.decoders + 1),d
+	pop de
+	ld a,00000001B  ; read-only
+	call DOS_OpenFileHandle
+	call DOS_TerminateIfError
+	ld (ix + MappedGzipLoader.fileHandle),b
+	push ix
+	call MappedGzipLoader_GetFileSupplier
+	ld de,READBUFFER
+	ld hl,READBUFFER_SIZE
+	call FileSupplier_Construct
+	ex (sp),ix
 	pop hl
 	push ix
-	call MappedGzipLoader_GetFileReader
+	call MappedGzipLoader_GetBitReader
 	ex de,hl
-	ld hl,READBUFFER
-	ld bc,READBUFFER_SIZE
-	call FileReader_Construct
+	call BitReader_Construct
 	ex (sp),ix
 	pop hl
 	push ix
@@ -63,10 +76,9 @@ MappedGzipLoader_Destruct:
 	ld bc,Decoders._size
 	call Heap_Free
 	pop ix
-	push ix
-	call MappedGzipLoader_GetFileReader
-	call FileReader_Destruct
-	pop ix
+	ld b,(ix + MappedGzipLoader.fileHandle)
+	call DOS_CloseFileHandle
+	call DOS_TerminateIfError
 	ret
 
 ; ix = this
@@ -82,8 +94,16 @@ MappedGzipLoader_GetBuffer:
 ; ix = this
 ; ix <- file reader
 ; Modifies: de
-MappedGzipLoader_GetFileReader:
-	ld de,MappedGzipLoader.fileReader
+MappedGzipLoader_GetFileSupplier:
+	ld de,MappedGzipLoader.fileSupplier
+	add ix,de
+	ret
+
+; ix = this
+; ix <- bit reader
+; Modifies: de
+MappedGzipLoader_GetBitReader:
+	ld de,MappedGzipLoader.bitReader
 	add ix,de
 	ret
 
