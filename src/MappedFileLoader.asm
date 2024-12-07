@@ -1,59 +1,59 @@
 ;
-; Buffers an entire file in memory
+; Loads a file into a mapped buffer
 ;
-MappedBufferLoader_PAGE_START: equ 8000H
-MappedBufferLoader_PAGE_SIZE: equ 4000H
-MappedBufferLoader_PAGE_END: equ MappedBufferLoader_PAGE_START + MappedBufferLoader_PAGE_SIZE
+MappedFileLoader_BUFFER_START: equ 8000H
+MappedFileLoader_BUFFER_SIZE: equ 4000H
+MappedFileLoader_BUFFER_END: equ MappedFileLoader_BUFFER_START + MappedFileLoader_BUFFER_SIZE
 
-MappedBufferLoader: MACRO
+MappedFileLoader: MACRO
 	fileHandle:
-		db 0
+		db 0FFH
 	buffer:
 		dw 0
 	_size:
 	ENDM
 
-; hl = file path
 ; de = mapped buffer
+; hl = file path
 ; ix = this
-MappedBufferLoader_Construct:
-	ld (ix + MappedBufferLoader.buffer),e
-	ld (ix + MappedBufferLoader.buffer + 1),d
+MappedFileLoader_Construct:
+	ld (ix + MappedFileLoader.buffer + 0),e
+	ld (ix + MappedFileLoader.buffer + 1),d
 	ex de,hl
 	ld a,00000001B  ; read-only
 	call DOS_OpenFileHandle
 	call DOS_TerminateIfError
-	ld (ix + MappedBufferLoader.fileHandle),b
+	ld (ix + MappedFileLoader.fileHandle),b
 	ret
 
 ; ix = this
-MappedBufferLoader_Destruct:
-	ld b,(ix + MappedBufferLoader.fileHandle)
+MappedFileLoader_Destruct:
+	ld b,(ix + MappedFileLoader.fileHandle)
 	call DOS_CloseFileHandle
 	jp DOS_TerminateIfError
 
 ; ix = this
 ; de <- buffer
 ; ix <- buffer
-MappedBufferLoader_GetBuffer:
-	ld e,(ix + MappedBufferLoader.buffer)
-	ld d,(ix + MappedBufferLoader.buffer + 1)
+MappedFileLoader_GetBuffer:
+	ld e,(ix + MappedFileLoader.buffer + 0)
+	ld d,(ix + MappedFileLoader.buffer + 1)
 	ld ixl,e
 	ld ixh,d
 	ret
 
 ; ix = this
-MappedBufferLoader_Load: PROC
-	ld de,MappedBufferLoader_PAGE_END
+MappedFileLoader_Load: PROC
+	ld de,MappedFileLoader_BUFFER_END
 Loop:
 	ld a,d
-	cp MappedBufferLoader_PAGE_END >> 8
+	cp MappedFileLoader_BUFFER_END >> 8
 	call nc,NextSegment
 	call Load
 	push af
 	push de
 	push ix
-	call MappedBufferLoader_GetBuffer
+	call MappedFileLoader_GetBuffer
 	call MappedBuffer_IncreaseSize
 	pop ix
 	pop de
@@ -64,26 +64,26 @@ Loop:
 	jr Loop
 NextSegment:
 	push ix
-	call MappedBufferLoader_GetBuffer
+	call MappedFileLoader_GetBuffer
 	call MappedBuffer_AllocateAndAddSegment
-	ld h,MappedBufferLoader_PAGE_START >> 8
+	ld h,MappedFileLoader_BUFFER_START >> 8
 	call MappedBuffer_SelectSegment
 	pop ix
-	ld de,MappedBufferLoader_PAGE_START
+	ld de,MappedFileLoader_BUFFER_START
 	ret
 Load:
 	push de
 	ld h,d
 	call Memory_GetSlot
 	pop de
-	ld hl,MappedBufferLoader_PAGE_END
+	ld hl,MappedFileLoader_BUFFER_END
 	and a
 	sbc hl,de
 	ld b,a
 	ld a,(Mapper_instance.primaryMapperSlot)
 	cp b
-	jr z,MappedBufferLoader_LoadDirect
-	jr MappedBufferLoader_LoadIndirect
+	jr z,MappedFileLoader_LoadDirect
+	jr MappedFileLoader_LoadIndirect
 	ENDP
 
 ; de = destination
@@ -92,9 +92,9 @@ Load:
 ; a <- error
 ; de <- updated destination
 ; hl <- actual byte count
-MappedBufferLoader_LoadDirect:
+MappedFileLoader_LoadDirect:
 	push de
-	ld b,(ix + MappedBufferLoader.fileHandle)
+	ld b,(ix + MappedFileLoader.fileHandle)
 	call DOS_ReadFromFileHandle
 	pop de
 	add hl,de
@@ -109,7 +109,7 @@ MappedBufferLoader_LoadDirect:
 ; a <- error
 ; de <- updated destination
 ; hl <- actual byte count
-MappedBufferLoader_LoadIndirect: PROC
+MappedFileLoader_LoadIndirect: PROC
 	push de
 	ld de,READBUFFER_SIZE
 	and a
@@ -119,7 +119,7 @@ MappedBufferLoader_LoadIndirect: PROC
 	ex de,hl
 NoClamp:
 	ld de,READBUFFER
-	ld b,(ix + MappedBufferLoader.fileHandle)
+	ld b,(ix + MappedFileLoader.fileHandle)
 	call DOS_ReadFromFileHandle
 	pop de
 	push af

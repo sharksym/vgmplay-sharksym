@@ -11,7 +11,7 @@ Application: MACRO
 	mappedBufferFactory:
 		StaticFactory MappedBuffer_instance, MappedBuffer_Construct, MappedBuffer_Destruct
 	loader:
-		MappedBufferLoader
+		MappedFileLoader
 	reader:
 		MappedReader
 	drivers:
@@ -26,11 +26,6 @@ Application: MACRO
 		StaticFactory player, Player_Construct, Player_Destruct
 	_size:
 	ENDM
-
-FileReader_class: Class FileReader, FileReader_template, Heap_main
-FileReader_template: FileReader
-GzipArchive_class: Class GzipArchive, GzipArchive_template, Heap_main
-GzipArchive_template: GzipArchive
 
 ;
 Application_Main:
@@ -215,12 +210,12 @@ Application_LoadFile:
 	push ix
 	call Application_GetLoader
 	ld de,MappedBuffer_instance
-	call MappedBufferLoader_Construct
+	call MappedFileLoader_Construct
 	push ix
-	ld hl,MappedBufferLoader_Load
+	ld hl,MappedFileLoader_Load
 	call System_TryCall
 	pop ix
-	call MappedBufferLoader_Destruct
+	call MappedFileLoader_Destruct
 	pop ix
 	jp System_Rethrow
 
@@ -267,74 +262,24 @@ Application_IsVGZ:
 	ret
 
 ; ix = this
-Application_InflateFile: PROC
+Application_InflateFile:
 	push ix
 	call Application_GetCLI
 	call CLI_GetFileInfoBlock
-	ld e,ixl
-	ld d,ixh
-	pop ix
-	ld hl,READBUFFER
-	ld bc,READBUFFER_SIZE
-	push ix
-	call FileReader_class.New
-	call FileReader_Construct
-	push ix
-	push ix
-	push ix
-	ld ix,Heap_main
-	ld bc,Decoders._size
-	call Heap_Allocate
-	ld c,e
-	ld b,d
-	pop ix
-	pop hl
-	push bc
-	ld de,Mapped32KWriter_BASE_ADDRESS
-	ld a,GZIP_CRC32 ? -1 : 0
-	call GzipArchive_class.New
-	call GzipArchive_Construct
-	push ix
-	call Mapped32KWriter_class.New
-	ld de,MappedBuffer_instance
-	call Mapped32KWriter_Construct
-	ld e,ixl
-	ld d,ixh
 	ex (sp),ix
+	pop hl
 	push ix
-	ld hl,InflateLoop
+	call MappedGzipLoader_class.New
+	ld de,MappedBuffer_instance
+	call MappedGzipLoader_Construct
+	push ix
+	ld hl,MappedGzipLoader_Load
 	call System_TryCall
 	pop ix
-	ex (sp),ix
-	call Mapped32KWriter_Destruct
-	call Mapped32KWriter_class.Delete
-	pop ix
-	call GzipArchive_class.Delete
-	pop de
-	push ix
-	ld ix,Heap_main
-	ld bc,Decoders._size
-	call Heap_Free
-	pop ix
-	pop ix
-	call FileReader_Destruct
-	call FileReader_class.Delete
+	call MappedGzipLoader_Destruct
+	call MappedGzipLoader_class.Delete
 	pop ix
 	jp System_Rethrow
-; de = mapped writer
-; ix = gzip archive
-InflateLoop:
-	push de
-	call GzipArchive_Inflate
-	ex (sp),ix
-	push af
-	call Mapped32KWriter_CopyToMappedBuffer
-	pop af
-	ex (sp),ix
-	pop de
-	jr nz,InflateLoop
-	ret
-	ENDP
 
 ; ix = this
 Application_PrintLoading:

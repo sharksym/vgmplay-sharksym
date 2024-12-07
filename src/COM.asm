@@ -44,9 +44,9 @@ RAM: equ RAM_PAGE1
 	INCLUDE "CLI.asm"
 	INCLUDE "StaticFactory.asm"
 	INCLUDE "MappedBuffer.asm"
-	INCLUDE "MappedBufferLoader.asm"
+	INCLUDE "MappedFileLoader.asm"
+	INCLUDE "MappedGzipLoader.asm"
 	INCLUDE "MappedReader.asm"
-	INCLUDE "Mapped32KWriter.asm"
 
 	; gunzip
 	INCLUDE "GzipArchive.asm"
