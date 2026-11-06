@@ -13,8 +13,8 @@ Plays back VGM music files on MSX with the supported sound chips.
 
   * Author: Laurens Holst <laurens@grauw.nl>
   * Site: <http://www.grauw.nl/projects/vgmplay-msx/>
-  * Source: <https://hg.sr.ht/~grauw/vgmplay-msx>
-  * Issues: <https://todo.sr.ht/~grauw/vgmplay-msx>
+  * Source: <https://github.com/grauw/vgmplay-msx>
+  * Issues: <https://github.com/grauw/vgmplay-msx/issues>
   * Support: <http://www.msx.org/forum/msx-talk/software/vgmplay-msx>
   * License: Simplified BSD License
 
@@ -129,11 +129,10 @@ mentioned in the project information section.
 You are also free to re-use code for your own projects, provided you abide by
 the license terms.
 
-VGMPlay depends on the library projects Neonlib and Gunzip; it is recommended
-to clone the project with Mercurial so they will automatically be pulled in
-at the correct version, otherwise you have to download them manually:
+VGMPlay depends on the library projects Neonlib and Gunzip, which are included as
+Git submodules. Clone the project and its submodules at the correct versions with:
 
-    hg clone https://hg.sr.ht/~grauw/vgmplay-msx
+    git clone --recurse-submodules https://github.com/grauw/vgmplay-msx.git
 
 Building the project is easy on all modern desktop platforms. On MacOS and
 Linux, simply invoke `make` to build the binary and symbol files into the
