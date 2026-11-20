@@ -1,0 +1,6 @@
+[submodule "lib/gunzip"]
+	path = lib/gunzip
+	url = git@github.com:grauw/gunzip.git
+[submodule "lib/neonlib"]
+	path = lib/neonlib
+	url = git@github.com:grauw/neonlib.git
